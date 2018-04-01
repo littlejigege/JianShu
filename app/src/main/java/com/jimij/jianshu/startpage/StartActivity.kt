@@ -1,0 +1,23 @@
+package com.jimij.jianshu.startpage
+
+import android.os.Bundle
+import com.jimij.jianshu.mainpage.MainActivity
+import com.jimij.jianshu.R
+
+import com.jimij.jianshu.common.BaseActivity
+import com.mobile.utils.doAfter
+import com.mobile.utils.fullScreen
+class StartActivity : BaseActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        fullScreen()
+        setContentView(R.layout.activity_start)
+        //假装在加载什么牛逼的东西
+        doAfter(2000) {
+            MainActivity.transitionTo(this)
+            finishAfterTransition()
+        }
+    }
+
+}
