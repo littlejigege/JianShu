@@ -1,8 +1,6 @@
-package com.example.androidservice.handler
+package com.jimij.jianshu.server.handler
 
-import android.os.Environment
 import com.mobile.utils.JsonMaker
-import com.mobile.utils.JsonWrapper
 import com.weechan.httpserver.httpserver.HttpRequest
 import com.weechan.httpserver.httpserver.HttpResponse
 import com.weechan.httpserver.httpserver.interfaces.HttpHandler

@@ -13,7 +13,6 @@ import com.mobile.utils.showToast
 class StartActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         fullScreen()
         setContentView(R.layout.activity_start)
@@ -23,7 +22,6 @@ class StartActivity : BaseActivity() {
             finishAfterTransition()
         }
 
-        showToast("修复后 一点BUG也么啦")
     }
 
 }

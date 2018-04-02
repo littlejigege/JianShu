@@ -1,4 +1,4 @@
-package com.example.androidservice.handler
+package com.jimij.jianshu.server.handler
 
 
 
@@ -22,7 +22,7 @@ class MediaHandler : HttpHandler {
     override fun doGet(request: HttpRequest, response: HttpResponse) {
         val type = request.getRequestArgument("type")
         var jsonIn : InputStream? = null
-
+        println(type)
         when (type) {
             "music" -> jsonIn = Gson().toJson(MediaRepository.getMusic()).byteInputStream()
             "document" -> jsonIn = Gson().toJson(MediaRepository.getDocument()) .byteInputStream()
@@ -31,7 +31,6 @@ class MediaHandler : HttpHandler {
             "photo" -> jsonIn = Gson().toJson(MediaRepository.getPhotos(request.getRequestArgument("path"))).byteInputStream()
         }
 
-
         response.write {
             jsonIn?.writeTo(this)
         }
@@ -39,6 +38,7 @@ class MediaHandler : HttpHandler {
         response.addHeaders {
             "Access-Control-Allow-Origin"-"*"
             "Access-Control-Allow-Methods"-"POST,GET"
+            "Content-Type" - "text/plain; charset=utf-8"
         }
     }
 

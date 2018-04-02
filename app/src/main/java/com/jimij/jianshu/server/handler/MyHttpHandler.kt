@@ -1,4 +1,4 @@
-package com.example.androidservice.handler
+package com.jimij.jianshu.server.handler
 
 import com.google.gson.Gson
 import com.jimij.jianshu.data.MFile
@@ -31,6 +31,7 @@ class MyHttpHandler : HttpHandler {
         response.addHeaders {
             "Access-Control-Allow-Origin"-"*"
             "Access-Control-Allow-Methods"-"POST,GET"
+            "Content-Type" - "text/plain; charset=utf-8"
         }
     }
 

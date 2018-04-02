@@ -17,6 +17,8 @@ import com.jimij.jianshu.server.HttpServerService
 import com.jimij.jianshu.utils.createSafeTransitionParticipants
 import com.mobile.utils.*
 import com.mobile.utils.permission.Permission
+import com.taobao.sophix.SophixManager
+import com.weechan.httpserver.httpserver.HttpServerBuilder
 import com.weechan.httpserver.httpserver.uitls.getHostIp
 
 import kotlinx.android.synthetic.main.activity_main.*
@@ -59,6 +61,7 @@ class MainActivity : BaseActivity() {
             doAfter(2000) {
                 progressBar.invisiable()
                 textView.visiable()
+
             }
             mServerController.start()
         }
