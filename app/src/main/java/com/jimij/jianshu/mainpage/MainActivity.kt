@@ -23,7 +23,25 @@ import com.weechan.httpserver.httpserver.uitls.getHostIp
 
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity(), MainContract.View {
+
+
+    //与活动生命周期关联
+    private val presenter: MainPresenter = MainPresenter().apply { lifecycle.addObserver(this) }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        fullScreen()
+        setContentView(R.layout.activity_main)
+        buildEnterTransition()
+        btnOpenServer.setOnClickListener {
+            Permission.STORAGE.doAfterGet(this) {
+                inUiThread { presenter.startServer() }
+
+            }
+        }
+    }
+
     companion object {
         internal fun transitionTo(ctx: Activity) {
             val pairs = createSafeTransitionParticipants(ctx, true)
@@ -32,39 +50,24 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    lateinit var viewModel: MainViewModel
-    //遥控器
-    lateinit var mServerController: HttpServerService.ServiceController
-
-    private val connection = object : ServiceConnection {
-        override fun onServiceDisconnected(name: ComponentName?) {}
-
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            mServerController = service as HttpServerService.ServiceController
-        }
+    override fun onServerStop() {
 
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        fullScreen()
-        setContentView(R.layout.activity_main)
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        buildEnterTransition()
-        Permission.STORAGE.doAfterGet(this) {
-            bindService(Intent(this, HttpServerService::class.java), connection, Service.BIND_AUTO_CREATE)
-        }
+    override fun onServerStopped() {
 
-        textView.text = "${getHostIp()} 8080"
-        btnOpenServer.setOnClickListener {
-            progressBar.visiable()
-            doAfter(2000) {
-                progressBar.invisiable()
-                textView.visiable()
-
-            }
-            mServerController.start()
-        }
     }
 
+    override fun onServerStart() {
+        progressBar.visiable()
+    }
+
+    override fun onServerStarted() {
+        progressBar.invisiable()
+        textView.visiable()
+    }
+
+    override fun onIpPort(ip: String, post: String) {
+        textView.text = ip + post
+    }
 }

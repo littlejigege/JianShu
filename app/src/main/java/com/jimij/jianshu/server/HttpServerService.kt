@@ -27,7 +27,7 @@ class HttpServerService : Service() {
             }
 
             override fun stop() {
-
+                mServer.stop()
             }
 
         }
