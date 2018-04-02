@@ -4,7 +4,8 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import com.weechan.httpserver.httpserver.HttpServerFactory
+import com.weechan.httpserver.httpserver.HttpServerBuilder
+
 
 /**
  * Created by jimiji on 2018/3/31.
@@ -12,10 +13,11 @@ import com.weechan.httpserver.httpserver.HttpServerFactory
 class HttpServerService : Service() {
 
     private val mServer by lazy {
-        HttpServerFactory
+        HttpServerBuilder
                 .handlerPackage("server.handler")
                 .with(this)
-                .getHttpServer(8080)
+                .port(8080)
+                .getHttpServer()
     }
 
     private val mController by lazy {

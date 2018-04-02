@@ -52,6 +52,7 @@ class MainActivity : BaseActivity() {
         Permission.STORAGE.doAfterGet(this) {
             bindService(Intent(this, HttpServerService::class.java), connection, Service.BIND_AUTO_CREATE)
         }
+
         textView.text = "${getHostIp()} 8080"
         btnOpenServer.setOnClickListener {
             progressBar.visiable()
