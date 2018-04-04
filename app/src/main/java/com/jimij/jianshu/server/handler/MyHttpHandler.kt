@@ -9,10 +9,11 @@ import com.weechan.httpserver.httpserver.interfaces.HttpHandler
 import com.weechan.httpserver.httpserver.annotaions.Http
 import java.io.File
 import java.io.OutputStream
+import java.util.*
 
 /**
- * Created by 铖哥 on 2018/3/20.
- */
+* Created by 铖哥 on 2018/3/20.
+*/
 
 @Http(route = "/find")
 class MyHttpHandler : HttpHandler {
@@ -29,22 +30,30 @@ class MyHttpHandler : HttpHandler {
             }
         }
         response.addHeaders {
-            "Access-Control-Allow-Origin"-"*"
-            "Access-Control-Allow-Methods"-"POST,GET"
+            "Access-Control-Allow-Origin" - "*"
+            "Access-Control-Allow-Methods" - "POST,GET"
             "Content-Type" - "text/plain; charset=utf-8"
         }
     }
 
     private fun writeFileMessage(file: File, output: OutputStream) {
         val response: MFileResponse
-        if (!file.exists()) {
-            response = MFileResponse(-1, null)
+        response = if (!file.exists()) {
+            MFileResponse(-1, null)
         } else {
             val mFiles = mutableListOf<MFile>()
             file.listFiles().forEach {
-                mFiles.add(MFile(it.isFile, it.length(), it.path))
+                mFiles.add(MFile(it.isDirectory, it.length(), it.path))
             }
-            response = MFileResponse(1, mFiles)
+            Collections.sort(mFiles, { o1, o2 ->
+                fun getName(file: MFile) = file.name.substring(file.name.lastIndexOf("/") + 1, file.name.lastIndex)
+                getName(o1).compareTo(getName(o2))
+            })
+            Collections.sort(mFiles, { o1, o2 ->
+                if (o1.isDirectory == o2.isDirectory) return@sort 0
+                if (o1.isDirectory) return@sort 1 else return@sort -1
+            })
+            MFileResponse(1, mFiles)
         }
         val resp = Gson().toJson(response)
         output.write(resp.toByteArray())

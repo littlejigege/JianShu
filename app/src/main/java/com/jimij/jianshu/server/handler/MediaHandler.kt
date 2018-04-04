@@ -12,8 +12,9 @@ import com.weechan.httpserver.httpserver.uitls.writeTo
 import java.io.InputStream
 
 /**
- * Created by weechan on 18-3-24.
- */
+* Created by weechan on 18-3-24.
+ * 多媒体请求
+*/
 
 @Http("/getMedia")
 class MediaHandler : HttpHandler {

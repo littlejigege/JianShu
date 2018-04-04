@@ -6,6 +6,6 @@ package com.jimij.jianshu.data
 
 data class MFileResponse(val code : Int, val mFile: List<MFile>?)
 
-data class MFile(val isFile: Boolean,
+data class MFile(val isDirectory: Boolean,
                  val size: Long,
                  val name: String)
