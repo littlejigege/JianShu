@@ -80,6 +80,7 @@ class MainActivity : BaseActivity(), MainContract.View {
             if (result.contents == null) {
                 //TODO 扫描无结果
             } else {
+                showToast(result.contents)
                 //TODO 扫描结果为 result.contents
             }
         } else {

@@ -45,13 +45,13 @@ class MyHttpHandler : HttpHandler {
             file.listFiles().forEach {
                 mFiles.add(MFile(it.isDirectory, it.length(), it.path))
             }
-            Collections.sort(mFiles, { o1, o2 ->
+            mFiles.sortWith(Comparator { o1, o2 ->
                 fun getName(file: MFile) = file.name.substring(file.name.lastIndexOf("/") + 1, file.name.lastIndex)
                 getName(o1).compareTo(getName(o2))
             })
-            Collections.sort(mFiles, { o1, o2 ->
-                if (o1.isDirectory == o2.isDirectory) return@sort 0
-                if (o1.isDirectory) return@sort 1 else return@sort -1
+            mFiles.sortWith(Comparator { o1, o2 ->
+                if (o1.isDirectory == o2.isDirectory)  return@Comparator 0
+                if (o1.isDirectory)  1 else  -1
             })
             MFileResponse(1, mFiles)
         }

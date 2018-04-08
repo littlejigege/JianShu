@@ -4,10 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/JianShu.iml" filepath="$PROJECT_DIR$/.idea/JianShu.iml" />
       <module fileurl="file://E:\work\Android\wtf\JianShu\.idea\JianShu.iml" filepath="E:\work\Android\wtf\JianShu\.idea\JianShu.iml" />
-      <module fileurl="file://F:\study\Androidworkspace\JianShu\JianShu.iml" filepath="F:\study\Androidworkspace\JianShu\JianShu.iml" />
-      <module fileurl="file://$PROJECT_DIR$/JianShu.iml" filepath="$PROJECT_DIR$/JianShu.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpserver/httpserver.iml" filepath="$PROJECT_DIR$/httpserver/httpserver.iml" />
     </modules>
   </component>
 </project>
