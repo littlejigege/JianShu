@@ -1,14 +1,12 @@
-package com.jimij.jianshu.mainpage
+package com.jimij.jianshu.ui.mainpage
 
 import android.app.Service
 import android.arch.lifecycle.GenericLifecycleObserver
 import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.LifecycleObserver
 import android.arch.lifecycle.LifecycleOwner
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Bundle
 import android.os.IBinder
 import com.jimij.jianshu.server.HttpServerService
 import com.mobile.utils.doAfter

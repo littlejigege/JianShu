@@ -9,6 +9,7 @@ import com.mobile.utils.Utils
 import kotlin.properties.Delegates
 
 import com.taobao.sophix.SophixManager
+//import com.uuzuche.lib_zxing.activity.ZXingLibrary
 
 
 /**
@@ -40,6 +41,7 @@ class App : Application() {
             SophixManager.getInstance().queryAndLoadNewPatch()
         }
         //初始化suger
+//        ZXingLibrary.initDisplayOpinion(this)
         Utils.init(this)
         ctx = this
     }

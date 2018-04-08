@@ -1,4 +1,4 @@
-package com.jimij.jianshu.mainpage
+package com.jimij.jianshu.ui.mainpage
 
 import com.jimij.jianshu.common.BaseMVPContract
 

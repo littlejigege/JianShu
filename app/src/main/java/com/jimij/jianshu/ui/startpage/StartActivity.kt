@@ -1,14 +1,12 @@
-package com.jimij.jianshu.startpage
+package com.jimij.jianshu.ui.startpage
 
 import android.os.Bundle
-import android.widget.Toast
-import com.jimij.jianshu.mainpage.MainActivity
+import com.jimij.jianshu.ui.mainpage.MainActivity
 import com.jimij.jianshu.R
 
 import com.jimij.jianshu.common.BaseActivity
 import com.mobile.utils.doAfter
 import com.mobile.utils.fullScreen
-import com.mobile.utils.showToast
 
 class StartActivity : BaseActivity() {
 
