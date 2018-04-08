@@ -29,6 +29,7 @@
         <!--hotfix相关-->
         <activity
             android:name=".mainpage.MainActivity"
+            android:label=""
             android:screenOrientation="portrait">
 
         </activity>

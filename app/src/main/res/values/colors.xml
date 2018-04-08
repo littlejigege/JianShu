@@ -4,5 +4,6 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="deepOrange">#fe5722</color>
+    <color name="blue">#2681f0</color>
     <color name="amber">#fec007</color>
 </resources>

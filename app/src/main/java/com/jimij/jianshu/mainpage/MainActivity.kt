@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.ActivityOptionsCompat
@@ -14,6 +15,7 @@ import com.jimij.jianshu.R
 import com.jimij.jianshu.common.BaseActivity
 
 import com.jimij.jianshu.server.HttpServerService
+import com.jimij.jianshu.utils.DrawableFitSize
 import com.jimij.jianshu.utils.createSafeTransitionParticipants
 import com.mobile.utils.*
 import com.mobile.utils.permission.Permission
@@ -31,14 +33,25 @@ class MainActivity : BaseActivity(), MainContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        fullScreen()
         setContentView(R.layout.activity_main)
-        buildEnterTransition()
-        btnOpenServer.setOnClickListener {
-            Permission.STORAGE.doAfterGet(this) {
-                inUiThread { presenter.startServer() }
+        initUI()
+        Permission.STORAGE.doAfterGet(this) {
+            inUiThread { presenter.startServer() }
+        }
+    }
 
-            }
+    private fun initUI() {
+        setSupportActionBar(toolBar)
+        supportActionBar?.setIcon(R.drawable.logo)
+        window.statusBarColor = Color.WHITE
+        setStatusBarTextBlack()
+        wifiName.setCompoundDrawables(DrawableFitSize(R.drawable.wifi), null, null, null)
+        buildEnterTransition()
+    }
+
+    private fun setUpListener() {
+        codeButton.setOnClickListener {
+            //TODO 扫码
         }
     }
 
@@ -59,15 +72,14 @@ class MainActivity : BaseActivity(), MainContract.View {
     }
 
     override fun onServerStart() {
-        progressBar.visiable()
+
     }
 
     override fun onServerStarted() {
-        progressBar.invisiable()
-        textView.visiable()
+
     }
 
     override fun onIpPort(ip: String, post: String) {
-        textView.text = ip + post
+        textViewHost.text = ip + ":" + post
     }
 }
