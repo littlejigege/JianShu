@@ -1,8 +1,15 @@
 package com.jimij.jianshu.data
 
 import android.content.ContentResolver
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.ThumbnailUtils
 import android.provider.MediaStore
+import android.provider.MediaStore.Video.Thumbnails.MICRO_KIND
+import android.provider.MediaStore.Video.Thumbnails.MINI_KIND
+import android.util.Log
 import com.jimij.jianshu.App
+import com.weechan.httpserver.httpserver.uitls.getMimeType
 
 import java.io.File
 import java.util.stream.Stream
@@ -177,6 +184,22 @@ object MediaRepository {
         list.addAll(File(path).listFiles().filter { it.isFile }.map { FileInfo(it.name, it.path, it.length()) })
         return list
     }
+
+    fun getThumbnail(path : String , type : Int): Bitmap? {
+
+        val file = File(path)
+        if(!file.exists()) return null;
+
+        if(type == 0 ) return ThumbnailUtils.createVideoThumbnail(path, MICRO_KIND)
+
+        if(type == 1 ){
+            val bitmap = BitmapFactory.decodeFile(path)
+            return ThumbnailUtils.extractThumbnail(bitmap ,150 ,100)
+        }
+
+        return null
+    }
+
 
     @Synchronized
     fun getApplications(): List<FileInfo>? {

@@ -16,7 +16,6 @@ import com.google.gson.annotations.SerializedName
 data class FileInfo(val name: String,
                     @SerializedName("path")val path: String,
                     @SerializedName("size")val size: Long = 0,
-
                     @Transient var icon: Drawable? = null) : Parcelable {
 
 

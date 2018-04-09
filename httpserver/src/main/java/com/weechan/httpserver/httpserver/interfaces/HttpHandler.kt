@@ -16,10 +16,15 @@ abstract class BaseHandler : HttpHandler{
 
 
     override fun doGet(request: HttpRequest, response: HttpResponse) {
+        response.addHeaders {
+            "Access-Control-Allow-Origin" - "*"
+            "Access-Control-Allow-Methods" - "POST,GET"
+        }
         response.httpState = HttpState.Method_Not_Allowed
     }
 
     override fun doPost(request: HttpRequest, response: HttpResponse) {
+
         response.httpState = HttpState.Method_Not_Allowed
     }
 

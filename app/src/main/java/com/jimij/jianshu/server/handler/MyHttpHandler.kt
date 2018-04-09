@@ -9,6 +9,7 @@ import com.weechan.httpserver.httpserver.interfaces.HttpHandler
 import com.weechan.httpserver.httpserver.annotaions.Http
 import java.io.File
 import java.io.OutputStream
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -43,10 +44,10 @@ class MyHttpHandler : HttpHandler {
         } else {
             val mFiles = mutableListOf<MFile>()
             file.listFiles().forEach {
-                mFiles.add(MFile(it.isDirectory, it.length(), it.path))
+                mFiles.add(MFile(it.isDirectory, it.length(), it.path, SimpleDateFormat.getDateInstance().format(Date(it.lastModified()))))
             }
             mFiles.sortWith(Comparator { o1, o2 ->
-                fun getName(file: MFile) = file.name.substring(file.name.lastIndexOf("/") + 1, file.name.lastIndex)
+                fun getName(file: MFile) = file.path.substring(file.path.lastIndexOf("/") + 1, file.path.lastIndex)
                 getName(o1).compareTo(getName(o2))
             })
             mFiles.sortWith(Comparator { o1, o2 ->

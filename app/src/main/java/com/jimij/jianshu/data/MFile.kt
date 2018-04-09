@@ -8,4 +8,5 @@ data class MFileResponse(val code : Int, val mFile: List<MFile>?)
 
 data class MFile(val isDirectory: Boolean,
                  val size: Long,
-                 val name: String)
+                 val path: String,
+                 val lastModify : String)
