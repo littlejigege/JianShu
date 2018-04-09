@@ -3,6 +3,6 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/httpserver/src/main/java/com/weechan/httpserver/httpserver/reslover/body/FormDataPart.kt" charset="GBK" />
     <file url="file://$PROJECT_DIR$/httpserver/src/main/java/com/weechan/httpserver/httpserver/reslover/body/ResponseBodyStreams.kt" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/httpserver/src/main/java/com/weechan/httpserver/httpserver/reslover/body/ResponseSink.kt" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/httpserver/src/main/java/com/weechan/httpserver/httpserver/reslover/body/ResponseInputstream.kt" charset="GBK" />
   </component>
 </project>

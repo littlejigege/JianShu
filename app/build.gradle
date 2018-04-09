@@ -34,11 +34,14 @@ dependencies {
     //suger
     compile 'com.github.littlejigege:suger:v0.0.8.7'
     //AndroidHttpServer
-    compile 'com.github.weeChanc:AndroidService:0.5.1'
+
     // ViewModel and LiveData
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation 'com.android.support:cardview-v7:27.1.0'
     compile 'com.aliyun.ams:alicloud-android-hotfix:3.2.1'
+
+    compile project(':httpserver')
+
     compile 'com.journeyapps:zxing-android-embedded:3.6.0'
     compile 'com.google.zxing:core:3.3.0'
     compile 'org.greenrobot:eventbus:3.1.1'
