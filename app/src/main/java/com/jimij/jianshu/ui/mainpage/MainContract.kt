@@ -19,5 +19,6 @@ interface MainContract {
     interface Presenter<V : MainContract.View> : BaseMVPContract.Presenter<V> {
         fun startServer()
         fun stopServer()
+        fun copyText(text: String)
     }
 }

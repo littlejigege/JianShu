@@ -4,12 +4,12 @@ import android.app.Service
 import android.arch.lifecycle.GenericLifecycleObserver
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
-import android.content.ComponentName
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.os.IBinder
+import com.jimij.jianshu.App
 import com.jimij.jianshu.server.HttpServerService
 import com.mobile.utils.doAfter
+import com.mobile.utils.showToast
 import com.weechan.httpserver.httpserver.uitls.getHostIp
 
 /**
@@ -42,10 +42,8 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
         } else {
             mServerController?.start()
         }
-        doAfter(2000) {
             getView()?.onServerStarted()
             getView()?.onIpPort(getHostIp()!!, "8080")
-        }
     }
 
     override fun stopServer() {
@@ -59,6 +57,12 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
             view = null
         }
         view = source as MainActivity
+    }
+
+    override fun copyText(text: String) {
+        val cm = App.ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        cm.text = text
+        showToast("链接已复制到剪切板")
     }
 
 }

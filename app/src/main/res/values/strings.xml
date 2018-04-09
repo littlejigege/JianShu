@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">JianShu</string>
+    <string name="tip">在电脑浏览器中打开以下网址(长按复制)</string>
 </resources>

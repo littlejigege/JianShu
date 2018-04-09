@@ -6,10 +6,11 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
-import android.util.Log
+import android.view.View
 import com.google.zxing.integration.android.IntentIntegrator
 import com.jimij.jianshu.R
 import com.jimij.jianshu.common.BaseActivity
+import com.jimij.jianshu.common.BaseMVPContract
 
 import com.jimij.jianshu.utils.DrawableFitSize
 import com.jimij.jianshu.utils.createSafeTransitionParticipants
@@ -17,10 +18,12 @@ import com.mobile.utils.*
 import com.mobile.utils.permission.Permission
 
 import kotlinx.android.synthetic.main.activity_main.*
-import android.R.attr.data
-import android.widget.Toast
-import com.google.zxing.integration.android.IntentResult
 import com.jimij.jianshu.ui.scan.CaptureActivity
+import com.jimij.jianshu.utils.getConnectedWifiSSID
+import com.jimij.jianshu.utils.viewToBlurBitmap
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 
 
 //import com.uuzuche.lib_zxing.activity.CaptureActivity
@@ -36,6 +39,7 @@ class MainActivity : BaseActivity(), MainContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        EventBus.getDefault().register(this)
         setContentView(R.layout.activity_main)
         initUI()
         setUpListener()
@@ -46,22 +50,29 @@ class MainActivity : BaseActivity(), MainContract.View {
 
     private fun initUI() {
         setSupportActionBar(toolBar)
-        supportActionBar?.setIcon(R.drawable.logo)
         window.statusBarColor = Color.WHITE
         setStatusBarTextBlack()
         wifiName.setCompoundDrawables(DrawableFitSize(R.drawable.wifi), null, null, null)
         buildEnterTransition()
+        wifiName.text = getConnectedWifiSSID()
     }
 
     private fun setUpListener() {
-        val REQUEST_CODE = 1
         codeButton.setOnClickListener {
-            Permission.CAMERA.doAfterGet(this){
+            Permission.CAMERA.doAfterGet(this) {
                 val i = IntentIntegrator(this)
                 i.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
-                i.setCaptureActivity(CaptureActivity::class.java)
+                i.captureActivity = CaptureActivity::class.java
                 i.initiateScan()
             }
+        }
+        textViewHost.setOnLongClickListener {
+            //复制文本
+            presenter.copyText(textViewHost.text.toString())
+            return@setOnLongClickListener true
+        }
+        disConnectButton.setOnClickListener {
+            blurringView.gone()
         }
     }
 
@@ -73,18 +84,24 @@ class MainActivity : BaseActivity(), MainContract.View {
         }
     }
 
+    //二维码扫描结果
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             if (result.contents == null) {
-                //TODO 扫描无结果
+                showToast("扫描异常")
             } else {
-                //TODO 扫描结果为 result.contents
+                println("扫描结果：${result.contents}")
+                showToast(result.contents)
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
+    }
+
+    override fun onBackPressed() {
+        ActivityManager.doubleExit()
     }
 
     override fun onServerStop() {
@@ -105,5 +122,17 @@ class MainActivity : BaseActivity(), MainContract.View {
 
     override fun onIpPort(ip: String, post: String) {
         textViewHost.text = ip + ":" + post
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onConnected(nothing: String) {
+        if (blurringView.visibility == View.VISIBLE) return
+        blurringView.background = viewToBlurBitmap(contentView)?.toDrawable()
+        blurringView.visiable()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().unregister(this)
     }
 }

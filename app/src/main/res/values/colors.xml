@@ -2,8 +2,9 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#ff4081</color>
     <color name="deepOrange">#fe5722</color>
     <color name="blue">#2681f0</color>
     <color name="amber">#fec007</color>
+    <color name="blue2">#1295b3</color>
 </resources>

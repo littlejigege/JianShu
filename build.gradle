@@ -22,10 +22,10 @@ allprojects {
             url 'https://jitpack.io'
         }
 
-        maven{
+        maven {
             url "http://maven.aliyun.com/nexus/content/repositories/releases"
         }
-
+        maven { url 'https://github.com/500px/500px-android-blur/raw/master/releases/' }
     }
 }
 

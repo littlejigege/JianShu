@@ -6,10 +6,11 @@ import com.weechan.httpserver.httpserver.interfaces.HttpHandler
 import com.weechan.httpserver.httpserver.annotaions.Http
 import com.weechan.httpserver.httpserver.uitls.getHostIp
 import com.weechan.httpserver.httpserver.uitls.writeTo
+import org.greenrobot.eventbus.EventBus
 
 /**
-* Created by 铖哥 on 2018/3/23.
-*/
+ * Created by 铖哥 on 2018/3/23.
+ */
 @Http("/")
 class MainHandler() : HttpHandler {
 
@@ -320,6 +321,7 @@ class MainHandler() : HttpHandler {
     """.trimIndent()
 
     override fun doGet(request: HttpRequest, response: HttpResponse) {
+        EventBus.getDefault().post("")
         response.addHeaders {
             "Access-Control-Allow-Origin" - "*"
             "Access-Control-Allow-Methods" - "POST,GET"
@@ -327,8 +329,6 @@ class MainHandler() : HttpHandler {
         response.write {
             html.byteInputStream().writeTo(this)
         }
-
-
     }
 
     override fun doPost(request: HttpRequest, response: HttpResponse) {
