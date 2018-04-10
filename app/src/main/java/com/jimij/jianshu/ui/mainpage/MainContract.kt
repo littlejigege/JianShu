@@ -8,7 +8,7 @@ import com.jimij.jianshu.common.BaseMVPContract
 interface MainContract {
     interface View : BaseMVPContract.View {
         //ip端口信息获取回调
-        fun onIpPort(ip: String, post: String)
+        fun onIpPort(ip: String, port: String)
 
         fun onServerStart()
         fun onServerStarted()

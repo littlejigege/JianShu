@@ -1,11 +1,13 @@
 package com.jimij.jianshu.ui.mainpage
 
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
+import android.util.Base64
 import android.view.View
 import com.google.zxing.integration.android.IntentIntegrator
 import com.jimij.jianshu.R
@@ -21,9 +23,13 @@ import kotlinx.android.synthetic.main.activity_main.*
 import com.jimij.jianshu.ui.scan.CaptureActivity
 import com.jimij.jianshu.utils.getConnectedWifiSSID
 import com.jimij.jianshu.utils.viewToBlurBitmap
+import com.weechan.httpserver.httpserver.uitls.getHostIp
+import kotlinx.coroutines.experimental.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import java.net.URL
+import java.util.*
 
 
 //import com.uuzuche.lib_zxing.activity.CaptureActivity
@@ -92,8 +98,14 @@ class MainActivity : BaseActivity(), MainContract.View {
             if (result.contents == null) {
                 showToast("扫描异常")
             } else {
-                println("扫描结果：${result.contents}")
-                showToast(result.contents)
+                val url = "http://120.77.38.183/qr/send?sign=${result.contents}&ip=${Base64.encodeToString("${getHostIp()}:8080".toByteArray(), 0)}"
+                println(url)
+                launch {
+                    try {
+                        URL(url).readText()
+                    } catch (e: Exception) {
+                    }
+                }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
@@ -120,8 +132,9 @@ class MainActivity : BaseActivity(), MainContract.View {
 
     }
 
-    override fun onIpPort(ip: String, post: String) {
-        textViewHost.text = ip + ":" + post
+    @SuppressLint("SetTextI18n")
+    override fun onIpPort(ip: String, port: String) {
+        textViewHost.text = ip + ":" + port
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
