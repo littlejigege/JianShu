@@ -26,7 +26,8 @@ class DeviceInfoHandler : BaseHandler() {
     override fun doGet(request: HttpRequest, response: HttpResponse) {
         response.writeObject(JsonMaker.make {
             objects {
-                "code" - 1
+                "code" - 0
+                "androidVersion" - getVersionName(android.os.Build.VERSION.SDK_INT)
                 "totalSize" - getTotalInternalMemorySize()
                 "availableSize" - getAvailableInternalMemorySize()
                 "model" - getSystemModel()
@@ -39,6 +40,22 @@ class DeviceInfoHandler : BaseHandler() {
             "Access-Control-Allow-Methods" - "POST,GET"
         }
 
+    }
+
+    private fun getVersionName(v: Int): String {
+
+        when (v) {
+            android.os.Build.VERSION_CODES.LOLLIPOP -> return "Android 5.0"
+            android.os.Build.VERSION_CODES.LOLLIPOP_MR1 -> return "Android 5.1"
+            android.os.Build.VERSION_CODES.M -> return "Andriid 6.0"
+            android.os.Build.VERSION_CODES.N -> return "Android 7.0"
+            android.os.Build.VERSION_CODES.N_MR1 -> return "Android 7.1"
+            android.os.Build.VERSION_CODES.O -> return "Android 8.0"
+            android.os.Build.VERSION_CODES.O_MR1 -> return "Android 8.1"
+
+        }
+
+        return "Android System"
     }
 
 

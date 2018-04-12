@@ -1,6 +1,9 @@
 package com.jimij.jianshu.server.handler
 
 import android.util.Log
+import com.jimij.jianshu.data.BaseResponse
+import com.jimij.jianshu.data.json
+import com.jimij.jianshu.utils.writeObject
 import com.mobile.utils.JsonMaker
 import com.weechan.httpserver.httpserver.HttpRequest
 import com.weechan.httpserver.httpserver.HttpResponse
@@ -24,7 +27,7 @@ class UploadHandler : BaseHandler() {
             JsonMaker.make {
                 objects {
                     "code" - if (savePath == null || fileName == null) -1 else 1
-                    "errMsg" - if (savePath == null || fileName == null) "参数不全,检查savePath与fileName参数" else ""
+                    "errorMsg" - if (savePath == null || fileName == null) "参数不全,检查savePath与fileName参数" else ""
                 }
             }.byteInputStream().writeTo(this)
         }
@@ -47,6 +50,8 @@ class UploadHandler : BaseHandler() {
             length = input.read(buf)
         }
         out.flush()
+
+        response.writeObject(BaseResponse(0,"").json())
     }
 
 

@@ -23,7 +23,7 @@ class ThumbnailHandler : BaseHandler(){
 
         if(path == null || type == null) {
             response.writeObject(JsonMaker.make {
-                objects { "code"- -1
+                objects { "code"- -2
                     "errorMsg"-"参数不全,需要type与path"
                 }
             })
@@ -33,7 +33,7 @@ class ThumbnailHandler : BaseHandler(){
 
         if(thumbnail == null){
             response.writeObject(JsonMaker.make {
-                objects { "code"- -2 ; "errorMsg"-"无法获取缩略图" }
+                objects { "code"- -1 ; "errorMsg"-"无法获取缩略图" }
             })
             return
         }

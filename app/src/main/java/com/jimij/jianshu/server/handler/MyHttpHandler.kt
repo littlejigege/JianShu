@@ -53,7 +53,7 @@ class MyHttpHandler : BaseHandler() {
                 if (o1.isDirectory == o2.isDirectory)  return@Comparator 0
                 if (o1.isDirectory)  1 else  -1
             })
-            MFileResponse(1, mFiles)
+            MFileResponse(0, mFiles)
         }
         val resp = Gson().toJson(response)
         output.write(resp.toByteArray())

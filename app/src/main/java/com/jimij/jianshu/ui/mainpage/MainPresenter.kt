@@ -32,7 +32,7 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
             mServerController = service as HttpServerService.ServiceController
             mServerController?.start()
             mServerController?.onIntercept {
-                
+
                 message ->
 
                 inUiThread {
