@@ -17,9 +17,18 @@ import com.weechan.httpserver.httpserver.uitls.getHostIp
  * Created by jimiji on 2018/4/2.
  */
 class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObserver {
+    override fun clearWhiter() {
+        mServerController?.clearWhiter()
+    }
+
+    override fun addWhiter(ip: String) {
+        mServerController?.addWhiter(ip)
+    }
 
 
     var view: MainActivity? = null
+    var isInterceptPass = false
+    var isPass = false
     //遥控器
     var mServerController: HttpServerService.ServiceController? = null
 
@@ -31,23 +40,18 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             mServerController = service as HttpServerService.ServiceController
             mServerController?.start()
-            mServerController?.onIntercept {
-
-                message ->
-
-                inUiThread {
-                val access : Boolean = getView()!!.requestPermission()
-                Log.e("MainPresenter", "ac ${access} ${message.ip}")
-                if(access) // 挂起
-                    mServerController?.addWhiter(message.ip)
+            mServerController?.onIntercept { message ->
+                inUiThread { getView()!!.requestPermission(message.ip) }
+                while (!isInterceptPass) {
                 }
-                true
+                isInterceptPass = false
+                !isPass
             }
         }
 
     }
 
-    fun getPermission():Boolean{
+    fun getPermission(): Boolean {
         return true
     }
 

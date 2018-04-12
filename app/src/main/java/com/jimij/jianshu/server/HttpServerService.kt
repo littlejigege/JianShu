@@ -30,6 +30,10 @@ class HttpServerService : Service() {
     }
 
     private val mController = object : ServiceController() {
+        override fun clearWhiter() {
+            whiteList.clear()
+        }
+
         override fun addWhiter(ip: String) {
             whiteList.add(ip)
         }
@@ -58,6 +62,7 @@ class HttpServerService : Service() {
         abstract fun start()
         abstract fun stop()
         abstract fun addWhiter(ip: String)
+        abstract fun clearWhiter()
         abstract fun onIntercept(listener: (RequestMessage) -> Boolean)
     }
 }

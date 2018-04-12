@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
 import android.util.Base64
 import android.view.View
+import com.afollestad.materialdialogs.MaterialDialog
 import com.google.zxing.integration.android.IntentIntegrator
 import com.jimij.jianshu.R
 import com.jimij.jianshu.common.BaseActivity
@@ -31,23 +32,27 @@ import java.net.URL
 
 
 class MainActivity : BaseActivity(), MainContract.View {
-    override fun requestPermission(): Boolean {
-        AlertDialog.Builder(this).setMessage("给我权限可以吗?")
-                .setPositiveButton("OJBK",{ dialog,a->dialog.dismiss()})
-                .setNegativeButton("不行",{ dialog,a->dialog.dismiss()})
-                .show()
-
-        //不行也得行, todo 需要阻塞对话框
-        return true
+    override fun requestPermission(ip: String) {
+        if (dialog == null) {
+            dialog = MaterialDialog.Builder(this)
+                    .title("连接请求")
+                    .content("ip为${ip}的设备请求连接")
+                    .positiveText("允许")
+                    .negativeText("不允许")
+                    .onPositive({ _, _ -> presenter.addWhiter(ip);presenter.isPass = true;presenter.isInterceptPass = true;dialog = null })
+                    .onNegative({ _, _ -> presenter.isPass = false;presenter.isInterceptPass = true; dialog = null })
+                    .cancelable(false)
+                    .show()
+        }
+        dialog?.show()
     }
 
+    private var dialog: MaterialDialog? = null
     //与活动生命周期关联
     private val presenter: MainPresenter = MainPresenter().apply { lifecycle.addObserver(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
         EventBus.getDefault().register(this)
         setContentView(R.layout.activity_main)
         initUI()
@@ -84,7 +89,7 @@ class MainActivity : BaseActivity(), MainContract.View {
         }
 
         disConnectButton.setOnClickListener {
-            //TODO DISCONNISCET!!
+            presenter.clearWhiter()
             blurringView.gone()
         }
     }
@@ -105,11 +110,10 @@ class MainActivity : BaseActivity(), MainContract.View {
             if (result.contents == null) {
                 showToast("扫描异常")
             } else {
-
                 val url = "http://120.77.38.183/qr/send?sign=${result.contents}&ip=${Base64.encodeToString("${getHostIp()}:8080".toByteArray(), 0)}"
                 launch {
                     try {
-                        URL(url).openConnection().connect()
+                        URL(url).readText()
                     } catch (e: Exception) {
                     }
                 }

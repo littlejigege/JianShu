@@ -15,12 +15,14 @@ interface MainContract {
         fun onServerStop()
         fun onServerStopped()
 
-        fun requestPermission() :Boolean
+        fun requestPermission(ip:String)
     }
 
     interface Presenter<V : MainContract.View> : BaseMVPContract.Presenter<V> {
         fun startServer()
         fun stopServer()
         fun copyText(text: String)
+        fun addWhiter(ip:String)
+        fun clearWhiter()
     }
 }
