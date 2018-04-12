@@ -14,6 +14,8 @@ interface MainContract {
         fun onServerStarted()
         fun onServerStop()
         fun onServerStopped()
+
+        fun requestPermission() :Boolean
     }
 
     interface Presenter<V : MainContract.View> : BaseMVPContract.Presenter<V> {

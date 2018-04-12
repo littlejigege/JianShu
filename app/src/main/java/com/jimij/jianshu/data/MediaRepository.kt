@@ -1,5 +1,6 @@
 package com.jimij.jianshu.data
 
+import android.arch.persistence.room.Room
 import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -7,9 +8,15 @@ import android.media.ThumbnailUtils
 import android.provider.MediaStore
 import android.provider.MediaStore.Video.Thumbnails.MICRO_KIND
 import android.provider.MediaStore.Video.Thumbnails.MINI_KIND
+import android.util.Base64
 import android.util.Log
 import com.jimij.jianshu.App
+import com.jimij.jianshu.db.ThumbnailDatabase
+import com.jimij.jianshu.db.entity.Thumbnail
+import com.mobile.utils.toBytes
 import com.weechan.httpserver.httpserver.uitls.getMimeType
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.async
 
 import java.io.File
 import java.util.stream.Stream
@@ -27,6 +34,7 @@ object MediaRepository {
 
 
     private val mContentResolver: ContentResolver = App.ctx.contentResolver
+    private val thumbnailsDao = Room.databaseBuilder(App.ctx, ThumbnailDatabase::class.java,"thumbnails").build().thumbnailDao()
 
     var musics: List<FileInfo>? = null
     var docs: List<FileInfo>? = null
@@ -34,15 +42,13 @@ object MediaRepository {
     var pictures: List<FileInfo>? = null
     var apps: List<FileInfo>? = null
 
-    fun init() {
-
+    init {
         thread {
             getMusic()
             getDocument()
             getApplications()
             getVideo()
         }
-
     }
 
     @Synchronized
@@ -185,7 +191,7 @@ object MediaRepository {
         return list
     }
 
-    fun getThumbnail(path : String , type : Int): Bitmap? {
+    private fun cutBitmapToThumbnails(path : String , type : Int): Bitmap? {
 
         val file = File(path)
         if(!file.exists()) return null;
@@ -199,7 +205,6 @@ object MediaRepository {
 
         return null
     }
-
 
     @Synchronized
     fun getApplications(): List<FileInfo>? {
@@ -224,6 +229,27 @@ object MediaRepository {
         apps = list
 
         return apps
+    }
+
+    fun saveThumbnail( thumbnail : Thumbnail){
+        thumbnailsDao.insert(thumbnail)
+    }
+
+    fun getThumbnail( path : String , type: Int): Thumbnail? {
+        val thumbnail = thumbnailsDao.getThumbnail(path)
+        if(thumbnail == null){
+            val bitmap = cutBitmapToThumbnails(path,type)
+            if(bitmap != null){
+                val bytes = bitmap.toBytes()
+                val t = Thumbnail(path, Base64.encodeToString(bytes,Base64.DEFAULT))
+
+                async(CommonPool) { saveThumbnail(t) }
+
+                return t
+            }
+
+        }
+        return thumbnail
     }
 
 

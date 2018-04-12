@@ -5,6 +5,7 @@ import com.example.androidservice.httpserver.reslover.reslovebean.RequestHeaders
 import com.example.androidservice.httpserver.reslover.reslovebean.RequestLine
 import com.example.androidservice.httpserver.reslover.reslovebean.RequestMessage
 import java.io.DataInputStream
+import java.net.Socket
 import java.net.URLDecoder
 
 /**
@@ -14,7 +15,9 @@ class HttpMessageReslover {
 
     companion object {
 
-        fun reslove(ins: DataInputStream): RequestMessage? {
+        fun reslove(socket: Socket): RequestMessage? {
+
+            val ins = DataInputStream(socket.getInputStream())
 
             val firstLine = ins.readLine() ?: return null
 
@@ -32,7 +35,7 @@ class HttpMessageReslover {
             val requestHeaders = RequestHeaders(headers.toString())
             val requestBody = RequestBody(ins, requestHeaders.get("content-type"), requestHeaders.get("content-length")?.toLongOrNull(),requestHeaders.get("boundary"))
 
-            return RequestMessage(requestLine, requestHeaders, requestBody)
+            return RequestMessage(socket.inetAddress.hostAddress,requestLine, requestHeaders, requestBody)
 
 
         }

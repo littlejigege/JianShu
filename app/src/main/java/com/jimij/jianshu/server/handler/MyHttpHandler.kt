@@ -7,6 +7,7 @@ import com.weechan.httpserver.httpserver.HttpRequest
 import com.weechan.httpserver.httpserver.HttpResponse
 import com.weechan.httpserver.httpserver.interfaces.HttpHandler
 import com.weechan.httpserver.httpserver.annotaions.Http
+import com.weechan.httpserver.httpserver.interfaces.BaseHandler
 import java.io.File
 import java.io.OutputStream
 import java.text.SimpleDateFormat
@@ -17,11 +18,7 @@ import java.util.*
 */
 
 @Http(route = "/find")
-class MyHttpHandler : HttpHandler {
-
-    override fun doPost(request: HttpRequest, response: HttpResponse) {
-
-    }
+class MyHttpHandler : BaseHandler() {
 
     override fun doGet(request: HttpRequest, response: HttpResponse) {
         val file = File(request.getRequestArgument("path"))
@@ -30,11 +27,13 @@ class MyHttpHandler : HttpHandler {
                 writeFileMessage(file, this)
             }
         }
+
         response.addHeaders {
             "Access-Control-Allow-Origin" - "*"
             "Access-Control-Allow-Methods" - "POST,GET"
             "Content-Type" - "text/plain; charset=utf-8"
         }
+
     }
 
     private fun writeFileMessage(file: File, output: OutputStream) {

@@ -5,9 +5,11 @@ import com.weechan.httpserver.httpserver.reslover.reslovebean.RequestBody
 /**
  * Created by 铖哥 on 2018/3/22.
  */
-data class RequestMessage(private val requestLine: RequestLine,
-                          private val requestHeaders: RequestHeaders,
-                          private val requestBody: RequestBody) {
+data class RequestMessage(
+        val ip: String,
+        private val requestLine: RequestLine,
+        private val requestHeaders: RequestHeaders,
+        private val requestBody: RequestBody) {
 
     lateinit var requestMethod: String
     lateinit var requestPath: String

@@ -19,7 +19,6 @@ import java.io.InputStream
 @Http("/getMedia")
 class MediaHandler : HttpHandler {
 
-
     override fun doGet(request: HttpRequest, response: HttpResponse) {
         val type = request.getRequestArgument("type")
         var jsonIn : InputStream? = null
@@ -42,7 +41,6 @@ class MediaHandler : HttpHandler {
             "Content-Type" - "text/plain; charset=utf-8"
         }
     }
-
 
     override fun doPost(request: HttpRequest, response: HttpResponse) {
 

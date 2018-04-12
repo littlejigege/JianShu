@@ -2,8 +2,10 @@ package com.weechan.httpserver.httpserver
 
 import android.content.Context
 import android.util.Log
+import com.example.androidservice.httpserver.reslover.reslovebean.RequestMessage
 import com.weechan.httpserver.httpserver.interfaces.HttpHandler
 import com.weechan.httpserver.httpserver.uitls.getClassesInPackage
+import java.net.Socket
 import java.nio.charset.Charset
 
 /**
@@ -17,11 +19,9 @@ class HttpServerBuilder {
         private lateinit var handlerClassList: List<Class<*>>
         private var port = 8080
         private var path: String? = null
-//        private var encodeCharset: String = "UTF-8"
-//        private var decodeCharset: String = "UTF-8"
+        var interceptor: ((RequestMessage) -> Boolean)? = null
 
         fun with(context: Context): Companion {
-//            if (handlerPackage == "") throw RuntimeException("need to invoke setup handlerPackage")
             handlerClassList = getClassesInPackage(handlerPackage, context)
             return this
         }
@@ -33,6 +33,13 @@ class HttpServerBuilder {
 
         fun port(port: Int): Companion {
             this.port = port
+            return this
+        }
+
+
+
+        fun intercept(interceptor: ((RequestMessage) -> Boolean)? = null) : Companion{
+            this.interceptor = interceptor
             return this
         }
 
@@ -52,6 +59,7 @@ class HttpServerBuilder {
             if(handlerClassList.isEmpty()){
                 Log.e("HttpServerBuilder", "注意,没有加入任何请求的处理器,这是你想要的结果吗?")
             }
+            server.interceptor = this.interceptor
             return server
         }
 

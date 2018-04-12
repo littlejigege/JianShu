@@ -13,6 +13,8 @@ import com.google.gson.annotations.SerializedName
 /**
  * Created by steve on 17-11-27.
  */
+
+
 data class FileInfo(val name: String,
                     @SerializedName("path")val path: String,
                     @SerializedName("size")val size: Long = 0,

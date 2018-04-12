@@ -1,5 +1,6 @@
 package com.jimij.jianshu.server.handler
 
+import android.util.Base64
 import com.jimij.jianshu.data.MediaRepository
 import com.jimij.jianshu.utils.writeObject
 import com.mobile.utils.JsonMaker
@@ -28,18 +29,26 @@ class ThumbnailHandler : BaseHandler(){
             })
             return
         }
-        val bitmap = MediaRepository.getThumbnail(path,mType)
+        val thumbnail = MediaRepository.getThumbnail(path,mType)
 
-        if(bitmap == null){
+        if(thumbnail == null){
             response.writeObject(JsonMaker.make {
                 objects { "code"- -2 ; "errorMsg"-"无法获取缩略图" }
             })
             return
         }
 
+
         response.write {
-            this.write(bitmap.toBytes())
+            this.write(Base64.decode(thumbnail.bitmap,Base64.DEFAULT))
         }
+
+        response.addHeaders {
+            "Access-Control-Allow-Origin" - "*"
+            "Access-Control-Allow-Methods" - "POST,GET"
+        }
+
+
 
 
     }

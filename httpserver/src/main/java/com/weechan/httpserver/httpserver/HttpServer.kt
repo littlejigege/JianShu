@@ -5,6 +5,7 @@ import com.weechan.httpserver.httpserver.annotaions.Http
 import com.weechan.httpserver.httpserver.interfaces.HttpHandler
 import com.example.androidservice.httpserver.reslover.HttpMessageReslover
 import com.example.androidservice.httpserver.reslover.reslovebean.RequestMessage
+import com.weechan.httpserver.httpserver.interfaces.Response
 import com.weechan.httpserver.httpserver.uitls.writeTo
 import java.io.*
 import java.net.*
@@ -22,8 +23,9 @@ class HttpServer constructor(val port: Int) {
     private val routerMapper = mutableMapOf<String, Class<*>>()
     private var serverSocket: ServerSocket? = null
 
+    var interceptor: ((RequestMessage) -> Boolean)? = null
 
-    fun  < T : HttpHandler >  addHandler(handler: Class<T>?) {
+    fun <T : HttpHandler> addHandler(handler: Class<T>?) {
         if (handler == null) return
         val route = handler.getAnnotation(Http::class.java).route
         Log.e("HttpServer", route)
@@ -34,7 +36,7 @@ class HttpServer constructor(val port: Int) {
         serverSocket?.close()
     }
 
-    fun destory(){
+    fun destory() {
         serverSocket?.close()
         pool.shutdown()
         routerMapper.clear()
@@ -51,24 +53,26 @@ class HttpServer constructor(val port: Int) {
         return true
     }
 
-    private fun execute(){
+    private fun execute() {
         pool.execute {
-            try{
+            try {
                 while (true) {
                     val socket = serverSocket?.accept() ?: continue
                     val handler = MessageDispatcher(socket)
                     pool.execute(handler)
                 }
-            }catch (e : Exception){
+            } catch (e: Exception) {
                 Log.e("HttpServer", "shutdown")
             }
         }
     }
 
+
+
     @Deprecated("unknow error")
-    fun startAuto(start : Int) : Int{
+    fun startAuto(start: Int): Int {
         var from = start
-        while(from <= 65535){
+        while (from <= 65535) {
             try {
                 serverSocket = ServerSocket(from)
             } catch (e: Exception) {
@@ -84,17 +88,26 @@ class HttpServer constructor(val port: Int) {
 
     inner class MessageDispatcher(val socket: Socket) : Runnable {
 
-        private val input: DataInputStream =DataInputStream(socket.getInputStream())
+        //        private val input: DataInputStream =DataInputStream(socket.getInputStream())
         private val out: OutputStream = socket.getOutputStream()
-        private var requestMessage : RequestMessage? = null
+        private var requestMessage: RequestMessage? = null
 
         override fun run() {
 
             try {
-                requestMessage = HttpMessageReslover.reslove(input)
-                requestMessage?:return
 
-                with(requestMessage!!){
+
+
+                requestMessage = HttpMessageReslover.reslove(socket)
+                requestMessage ?: return
+
+                if(interceptor?.invoke(requestMessage!!)?:false){
+                    forbidden()
+                    return
+                }
+
+
+                with(requestMessage!!) {
                     val h = routerMapper.get(requestPath)?.getConstructor()?.newInstance()
                     val handler: HttpHandler? = if (h == null) null else h as HttpHandler
                     val request = HttpRequest(this)
@@ -114,25 +127,24 @@ class HttpServer constructor(val port: Int) {
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
-                input.close()
                 out.close()
                 socket.close()
                 deleteAllTempFile()
             }
         }
 
-        private fun deleteAllTempFile(){
+        private fun deleteAllTempFile() {
 
-            requestMessage?:return
+            requestMessage ?: return
 
             val responseBodyStreams = requestMessage!!.getBody().responseBodyStreams
-            if(responseBodyStreams != null){
-                for( (k,v) in responseBodyStreams.dataPartMapper){
+            if (responseBodyStreams != null) {
+                for ((k, v) in responseBodyStreams.dataPartMapper) {
                     v.inputSink.close()
                 }
 
                 System.gc()
-                val filePath =  requestMessage!!.getBody().responseBodyStreams?.path
+                val filePath = requestMessage!!.getBody().responseBodyStreams?.path
                 if (filePath != null) {
                     File(filePath).delete()
                 }
@@ -146,12 +158,17 @@ class HttpServer constructor(val port: Int) {
                 out.write("$k:$v \r\n".toByteArray())
             }
             closeHead()
-            if(response.httpState == HttpState.Not_Found_404){
+            if (response.httpState == HttpState.Not_Found_404) {
                 HttpState.FOUR_O_FOUR_HTML.byteInputStream().writeTo(out)
                 return
             }
             response.write?.invoke(out)
+        }
 
+        private fun forbidden() {
+            val resp = HttpResponse()
+            resp.httpState = HttpState.Forbidden_403
+            process(resp)
         }
 
         private fun closeHead() {

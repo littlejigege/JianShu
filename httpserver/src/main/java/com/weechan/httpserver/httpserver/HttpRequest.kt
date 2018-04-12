@@ -11,6 +11,7 @@ import java.io.InputStream
  */
 open class HttpRequest(private val m: RequestMessage) {
 
+    val requestIp = m.ip
 
     fun getRequestHead(key: String) = m.getHead(key)
 

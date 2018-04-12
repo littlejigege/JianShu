@@ -3,6 +3,7 @@ package com.jimij.jianshu.ui.mainpage
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -12,44 +13,47 @@ import android.view.View
 import com.google.zxing.integration.android.IntentIntegrator
 import com.jimij.jianshu.R
 import com.jimij.jianshu.common.BaseActivity
-import com.jimij.jianshu.common.BaseMVPContract
-
+import com.jimij.jianshu.data.MediaRepository
+import com.jimij.jianshu.ui.scan.CaptureActivity
 import com.jimij.jianshu.utils.DrawableFitSize
 import com.jimij.jianshu.utils.createSafeTransitionParticipants
-import com.mobile.utils.*
-import com.mobile.utils.permission.Permission
-
-import kotlinx.android.synthetic.main.activity_main.*
-import com.jimij.jianshu.ui.scan.CaptureActivity
 import com.jimij.jianshu.utils.getConnectedWifiSSID
 import com.jimij.jianshu.utils.viewToBlurBitmap
+import com.mobile.utils.*
+import com.mobile.utils.permission.Permission
 import com.weechan.httpserver.httpserver.uitls.getHostIp
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.net.URL
-import java.util.*
-
-
-//import com.uuzuche.lib_zxing.activity.CaptureActivity
-//import com.uuzuche.lib_zxing.activity.CodeUtils
 
 
 class MainActivity : BaseActivity(), MainContract.View {
+    override fun requestPermission(): Boolean {
+        AlertDialog.Builder(this).setMessage("给我权限可以吗?")
+                .setPositiveButton("OJBK",{ dialog,a->dialog.dismiss()})
+                .setNegativeButton("不行",{ dialog,a->dialog.dismiss()})
+                .show()
 
-    val SCAN_REQUEST_CODE = 1
+        //不行也得行, todo 需要阻塞对话框
+        return true
+    }
 
     //与活动生命周期关联
     private val presenter: MainPresenter = MainPresenter().apply { lifecycle.addObserver(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
         EventBus.getDefault().register(this)
         setContentView(R.layout.activity_main)
         initUI()
         setUpListener()
         Permission.STORAGE.doAfterGet(this) {
+            MediaRepository
             inUiThread { presenter.startServer() }
         }
     }
@@ -72,12 +76,15 @@ class MainActivity : BaseActivity(), MainContract.View {
                 i.initiateScan()
             }
         }
+
         textViewHost.setOnLongClickListener {
             //复制文本
             presenter.copyText(textViewHost.text.toString())
             return@setOnLongClickListener true
         }
+
         disConnectButton.setOnClickListener {
+            //TODO DISCONNISCET!!
             blurringView.gone()
         }
     }
@@ -98,11 +105,11 @@ class MainActivity : BaseActivity(), MainContract.View {
             if (result.contents == null) {
                 showToast("扫描异常")
             } else {
+
                 val url = "http://120.77.38.183/qr/send?sign=${result.contents}&ip=${Base64.encodeToString("${getHostIp()}:8080".toByteArray(), 0)}"
-                println(url)
                 launch {
                     try {
-                        URL(url).readText()
+                        URL(url).openConnection().connect()
                     } catch (e: Exception) {
                     }
                 }
@@ -149,3 +156,4 @@ class MainActivity : BaseActivity(), MainContract.View {
         EventBus.getDefault().unregister(this)
     }
 }
+

@@ -2,6 +2,7 @@ package com.jimij.jianshu
 
 import android.app.Application
 import android.content.Context
+import com.jimij.jianshu.data.MediaRepository
 
 import com.mobile.utils.Utils
 
