@@ -8,6 +8,7 @@ import com.weechan.httpserver.httpserver.HttpRequest
 import com.weechan.httpserver.httpserver.HttpResponse
 import com.weechan.httpserver.httpserver.interfaces.HttpHandler
 import com.weechan.httpserver.httpserver.annotaions.Http
+import com.weechan.httpserver.httpserver.interfaces.BaseHandler
 import com.weechan.httpserver.httpserver.uitls.writeTo
 import java.io.InputStream
 
@@ -17,7 +18,7 @@ import java.io.InputStream
 */
 
 @Http("/getMedia")
-class MediaHandler : HttpHandler {
+class MediaHandler : BaseHandler() {
 
     override fun doGet(request: HttpRequest, response: HttpResponse) {
         val type = request.getRequestArgument("type")
@@ -42,8 +43,5 @@ class MediaHandler : HttpHandler {
         }
     }
 
-    override fun doPost(request: HttpRequest, response: HttpResponse) {
-
-    }
 
 }

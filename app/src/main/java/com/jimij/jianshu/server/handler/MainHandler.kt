@@ -4,6 +4,7 @@ import com.weechan.httpserver.httpserver.HttpRequest
 import com.weechan.httpserver.httpserver.HttpResponse
 import com.weechan.httpserver.httpserver.interfaces.HttpHandler
 import com.weechan.httpserver.httpserver.annotaions.Http
+import com.weechan.httpserver.httpserver.interfaces.BaseHandler
 import com.weechan.httpserver.httpserver.uitls.getHostIp
 import com.weechan.httpserver.httpserver.uitls.writeTo
 import org.greenrobot.eventbus.EventBus
@@ -12,7 +13,7 @@ import org.greenrobot.eventbus.EventBus
  * Created by 铖哥 on 2018/3/23.
  */
 @Http("/")
-class MainHandler() : HttpHandler {
+class MainHandler() : BaseHandler() {
 
     val ip: String = getHostIp() + ":8080"
 
@@ -329,10 +330,6 @@ class MainHandler() : HttpHandler {
         response.write {
             html.byteInputStream().writeTo(this)
         }
-    }
-
-    override fun doPost(request: HttpRequest, response: HttpResponse) {
-//        Log.e("MainHandler", request.getRequestBody().string)
     }
 
 

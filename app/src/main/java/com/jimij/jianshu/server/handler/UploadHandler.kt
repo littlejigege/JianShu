@@ -6,6 +6,7 @@ import com.weechan.httpserver.httpserver.HttpRequest
 import com.weechan.httpserver.httpserver.HttpResponse
 import com.weechan.httpserver.httpserver.interfaces.HttpHandler
 import com.weechan.httpserver.httpserver.annotaions.Http
+import com.weechan.httpserver.httpserver.interfaces.BaseHandler
 import com.weechan.httpserver.httpserver.uitls.writeTo
 import java.io.File
 
@@ -13,11 +14,7 @@ import java.io.File
  * Created by 铖哥 on 2018/3/25.
  */
 @Http("/upload")
-class UploadHandler : HttpHandler {
-    override fun doGet(request: HttpRequest, response: HttpResponse) {
-
-    }
-
+class UploadHandler : BaseHandler() {
     override fun doPost(request: HttpRequest, response: HttpResponse) {
 
         var savePath = request.getRequestArgument("savePath")

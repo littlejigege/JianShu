@@ -15,7 +15,7 @@ class StartActivity : BaseActivity() {
         fullScreen()
         setContentView(R.layout.activity_start)
         //假装在加载什么牛逼的东西
-        doAfter(2000) {
+        doAfter(1500) {
             MainActivity.transitionTo(this)
             finishAfterTransition()
         }
