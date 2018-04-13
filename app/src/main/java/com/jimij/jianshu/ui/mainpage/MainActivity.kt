@@ -1,9 +1,7 @@
 package com.jimij.jianshu.ui.mainpage
 
 
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -16,10 +14,7 @@ import com.jimij.jianshu.R
 import com.jimij.jianshu.common.BaseActivity
 import com.jimij.jianshu.data.MediaRepository
 import com.jimij.jianshu.ui.scan.CaptureActivity
-import com.jimij.jianshu.utils.DrawableFitSize
-import com.jimij.jianshu.utils.createSafeTransitionParticipants
-import com.jimij.jianshu.utils.getConnectedWifiSSID
-import com.jimij.jianshu.utils.viewToBlurBitmap
+import com.jimij.jianshu.utils.*
 import com.mobile.utils.*
 import com.mobile.utils.permission.Permission
 import com.weechan.httpserver.httpserver.uitls.getHostIp
@@ -143,9 +138,9 @@ class MainActivity : BaseActivity(), MainContract.View {
 
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onIpPort(ip: String, port: String) {
         textViewHost.text = ip + ":" + port
+        wifiName.text = getConnectedWifiSSID()
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

@@ -24,5 +24,6 @@ interface MainContract {
         fun copyText(text: String)
         fun addWhiter(ip:String)
         fun clearWhiter()
+        fun setupNetListener()
     }
 }

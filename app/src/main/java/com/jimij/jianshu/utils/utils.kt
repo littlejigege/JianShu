@@ -11,9 +11,11 @@ import android.view.View
 import android.widget.ImageView
 import com.google.gson.Gson
 import com.jimij.jianshu.App
-import com.mobile.utils.dp2px
-import com.mobile.utils.gaussBlud
+import com.mobile.utils.*
 import com.weechan.httpserver.httpserver.HttpResponse
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.delay
+import kotlin.concurrent.thread
 
 /**
  * Created by jimiji on 2018/3/31.
@@ -83,4 +85,41 @@ fun createBitmapFromView(view: View, scale: Float = 1f): Bitmap? {
 
 fun viewToBlurBitmap(view: View): Bitmap? {
     return gaussBlud(createBitmapFromView(view)!!, 25f)
+}
+
+object NetListener {
+    private val ls = mutableSetOf<NetCallback>()
+    private var type: NetworkType = NetworkType.NETWORK_2G
+    fun addListener(l: NetCallback) {
+        ls.add(l)
+    }
+
+    fun removeListener(l: NetCallback) {
+        ls.remove(l)
+    }
+
+    init {
+        type = getNetworkType()
+        async {
+            while (true) {
+                delay(2000)
+                synchronized(ls) {
+                    if (ls.isNotEmpty()) {
+                        val type_new = getNetworkType()
+                        if (type_new != type) {
+                            ls.forEach {
+                                inUiThread { it.onChange(type_new) }
+                            }
+                            type = type_new
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+interface NetCallback {
+    fun onChange(flag: NetworkType)
 }
