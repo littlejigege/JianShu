@@ -1,5 +1,7 @@
 package com.example.androidservice.httpserver.reslover
 
+import java.net.URLDecoder
+
 /**
  * Created by 铖哥 on 2018/3/17.
  */
@@ -32,7 +34,7 @@ class URLResolver {
 
             args.forEach {
                 val pair = it.split('=')
-                argumentMap.put(pair[0],pair[1])
+                argumentMap.put(URLDecoder.decode(pair[0],"utf-8"),URLDecoder.decode(pair[1],"utf-8"))
             }
 
             return argumentMap

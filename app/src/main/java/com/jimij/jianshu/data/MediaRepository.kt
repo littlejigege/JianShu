@@ -13,12 +13,15 @@ import android.util.Log
 import com.jimij.jianshu.App
 import com.jimij.jianshu.db.ThumbnailDatabase
 import com.jimij.jianshu.db.entity.Thumbnail
+import com.mobile.utils.toBitmap
 import com.mobile.utils.toBytes
 import com.weechan.httpserver.httpserver.uitls.getMimeType
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
 
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.stream.Stream
 import kotlin.concurrent.thread
 
@@ -35,12 +38,13 @@ object MediaRepository {
 
     private val mContentResolver: ContentResolver = App.ctx.contentResolver
     private val thumbnailsDao = Room.databaseBuilder(App.ctx, ThumbnailDatabase::class.java,"thumbnails").build().thumbnailDao()
+    private val formatter = SimpleDateFormat.getDateInstance()
 
-    var musics: List<FileInfo>? = null
-    var docs: List<FileInfo>? = null
-    var videos: List<FileInfo>? = null
-    var pictures: List<FileInfo>? = null
-    var apps: List<FileInfo>? = null
+    var musics: List<MFile>? = null
+    var docs: List<MFile>? = null
+    var videos: List<MFile>? = null
+    var pictures: List<MFile>? = null
+    var apps: List<MFile>? = null
 
     init {
         thread {
@@ -52,7 +56,7 @@ object MediaRepository {
     }
 
     @Synchronized
-    fun getMusic(): List<FileInfo> {
+    fun getMusic(): List<MFile> {
 
         if (musics != null) return musics!!
 
@@ -61,15 +65,14 @@ object MediaRepository {
                 projection, null, null, MediaStore.Audio.Media.DATE_MODIFIED + " desc")
 
 
-        val list = mutableListOf<FileInfo>()
+        val list = mutableListOf<MFile>()
 
         if (cursor != null && cursor.moveToFirst() && cursor.count > 0)
             do {
                 var initSize = (cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE))).toLong()
-                val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
                 val location = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
                 if (initSize == 0L) initSize = File(location).length()
-                val info = FileInfo(name, location, initSize)
+                val info = MFile(initSize, location, formatter.format(Date( File(location).lastModified())))
                 list.add(info)
             } while (cursor.moveToNext())
 
@@ -83,11 +86,11 @@ object MediaRepository {
     }
 
     @Synchronized
-    fun getDocument(): List<FileInfo> {
+    fun getDocument(): List<MFile> {
 
         if (docs != null) return docs!!
 
-        val list = mutableListOf<FileInfo>()
+        val list = mutableListOf<MFile>()
         val projection = arrayOf(MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.MIME_TYPE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.TITLE)
 
         val selection = (MediaStore.Files.FileColumns.MIME_TYPE + "= ? "
@@ -105,8 +108,7 @@ object MediaRepository {
             do {
                 val location = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA))
                 val initSize = java.lang.Long.parseLong(cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.SIZE)))
-                val name = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.TITLE))
-                val info = FileInfo(name, location, initSize)
+                val info = MFile(initSize, location, formatter.format(Date( File(location).lastModified())))
                 list.add(info)
             } while (cursor.moveToNext())
 
@@ -119,12 +121,12 @@ object MediaRepository {
     }
 
     @Synchronized
-    fun getVideo(): List<FileInfo> {
+    fun getVideo(): List<MFile> {
 
         if (videos != null) return videos!!
 
 
-        val list = mutableListOf<FileInfo>()
+        val list = mutableListOf<MFile>()
 
         val cursor = mContentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 arrayOf(MediaStore.Video.VideoColumns.DATA, MediaStore.Video.VideoColumns.TITLE,
@@ -136,9 +138,8 @@ object MediaRepository {
         if (cursor != null && cursor.moveToFirst() && cursor.count > 0) {
             do {
                 val location = cursor.getString(cursor.getColumnIndex(MediaStore.Video.VideoColumns.DATA))
-                val name = cursor.getString(cursor.getColumnIndex(MediaStore.Video.VideoColumns.TITLE))
                 val initSize = java.lang.Long.parseLong(cursor.getString(cursor.getColumnIndex(MediaStore.Video.VideoColumns.SIZE)))
-                val info = FileInfo(name, location, initSize)
+                val info = MFile(initSize, location, formatter.format(Date( File(location).lastModified())))
                 list.add(info)
             } while (cursor.moveToNext())
         }
@@ -149,11 +150,11 @@ object MediaRepository {
     }
 
     @Synchronized
-    fun getPhotosDirectory(): List<FileInfo> {
+    fun getPhotosDirectory(): List<MFile> {
 
         if (pictures != null) return pictures!!
 
-        val list = mutableListOf<FileInfo>()
+        val list = mutableListOf<MFile>()
         val addPath = HashSet<String>()
 
         val cursor = mContentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -172,10 +173,8 @@ object MediaRepository {
         cursor.close()
 
         addPath.forEach {
-
-            val name = it.substring(it.lastIndexOf('/') + 1, it.length)
             val location = it
-            val folderInfo = FileInfo(name, location)
+            val folderInfo = MFile(0, location,isDirectory = true)
             list.add(folderInfo)
         }
         this.pictures = list
@@ -184,10 +183,10 @@ object MediaRepository {
     }
 
     @Synchronized
-    fun getPhotos(path: String?): List<FileInfo>? {
+    fun getPhotos(path: String?): List<MFile>? {
         if (path == null) return null
-        val list = mutableListOf<FileInfo>()
-        list.addAll(File(path).listFiles().filter { it.isFile }.map { FileInfo(it.name, it.path, it.length()) })
+        val list = mutableListOf<MFile>()
+        list.addAll(File(path).listFiles().filter { it.isFile }.map { MFile(it.length(), it.path, formatter.format(Date(it.lastModified()))) })
         return list
     }
 
@@ -207,11 +206,11 @@ object MediaRepository {
     }
 
     @Synchronized
-    fun getApplications(): List<FileInfo>? {
+    fun getApplications(): List<MFile>? {
 
         if (apps != null) return apps
 
-        val list = mutableListOf<FileInfo>()
+        val list = mutableListOf<MFile>()
         val pm = App.ctx.packageManager
         var sourceDir: String
 
@@ -221,9 +220,9 @@ object MediaRepository {
             sourceDir = i.sourceDir
             val initSize = File(sourceDir).length()
             val location = sourceDir
-            val name = i.loadLabel(pm).toString()
-            val app = FileInfo(name, location, initSize)
+            val app = MFile(initSize, location,formatter.format(Date( File(location).lastModified())))
             list.add(app)
+            thumbnailsDao.insertIgnore(Thumbnail(location,Base64.encodeToString(pm.getApplicationIcon(i).toBitmap()?.toBytes(),Base64.DEFAULT)))
         }
 
         apps = list
@@ -236,15 +235,16 @@ object MediaRepository {
     }
 
     fun getThumbnail( path : String , type: Int): Thumbnail? {
+
         val thumbnail = thumbnailsDao.getThumbnail(path)
+        if(type == 2) return thumbnail
+
         if(thumbnail == null){
             val bitmap = cutBitmapToThumbnails(path,type)
             if(bitmap != null){
                 val bytes = bitmap.toBytes()
                 val t = Thumbnail(path, Base64.encodeToString(bytes,Base64.DEFAULT))
-
                 async(CommonPool) { saveThumbnail(t) }
-
                 return t
             }
 

@@ -96,8 +96,6 @@ class HttpServer constructor(val port: Int) {
 
             try {
 
-
-
                 requestMessage = HttpMessageReslover.reslove(socket)
                 requestMessage ?: return
 

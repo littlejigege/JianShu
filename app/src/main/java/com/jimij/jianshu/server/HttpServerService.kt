@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import android.support.v4.app.NotificationCompat
 import com.example.androidservice.httpserver.reslover.reslovebean.RequestMessage
 import com.weechan.httpserver.httpserver.HttpServerBuilder
 import java.net.Socket
@@ -27,6 +28,11 @@ class HttpServerService : Service() {
                     intercept?.invoke(message)?:false
                 }
                 .getHttpServer()
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        startForeground(1,NotificationCompat.Builder(this,"service").build())
     }
 
     private val mController = object : ServiceController() {

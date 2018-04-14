@@ -6,6 +6,8 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Point
+import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
 import android.util.Base64
@@ -16,10 +18,7 @@ import com.jimij.jianshu.R
 import com.jimij.jianshu.common.BaseActivity
 import com.jimij.jianshu.data.MediaRepository
 import com.jimij.jianshu.ui.scan.CaptureActivity
-import com.jimij.jianshu.utils.DrawableFitSize
-import com.jimij.jianshu.utils.createSafeTransitionParticipants
-import com.jimij.jianshu.utils.getConnectedWifiSSID
-import com.jimij.jianshu.utils.viewToBlurBitmap
+import com.jimij.jianshu.utils.*
 import com.mobile.utils.*
 import com.mobile.utils.permission.Permission
 import com.weechan.httpserver.httpserver.uitls.getHostIp
@@ -29,9 +28,19 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.net.URL
+import android.util.DisplayMetrics
+import android.util.Log
+import android.view.WindowManager
+import com.jimij.jianshu.data.ScreenCaptureResult
 
 
 class MainActivity : BaseActivity(), MainContract.View {
+
+    private var screenCapture: ScreenCapture? = null
+    private var dialog: MaterialDialog? = null
+    //与活动生命周期关联
+    private val presenter: MainPresenter = MainPresenter().apply { lifecycle.addObserver(this) }
+
     override fun requestPermission(ip: String) {
         if (dialog == null) {
             dialog = MaterialDialog.Builder(this)
@@ -47,10 +56,6 @@ class MainActivity : BaseActivity(), MainContract.View {
         dialog?.show()
     }
 
-    private var dialog: MaterialDialog? = null
-    //与活动生命周期关联
-    private val presenter: MainPresenter = MainPresenter().apply { lifecycle.addObserver(this) }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         EventBus.getDefault().register(this)
@@ -61,6 +66,12 @@ class MainActivity : BaseActivity(), MainContract.View {
             MediaRepository
             inUiThread { presenter.startServer() }
         }
+
+        val point = getScreenSize()
+        startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), 199)
+        screenCapture = ScreenCapture(point.x, point.y)
+
+
     }
 
     private fun initUI() {
@@ -94,18 +105,12 @@ class MainActivity : BaseActivity(), MainContract.View {
         }
     }
 
-    companion object {
-        internal fun transitionTo(ctx: Activity) {
-            val pairs = createSafeTransitionParticipants(ctx, true)
-            val transitionActivityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(ctx, *pairs)
-            ctx.startActivity(Intent(ctx, MainActivity::class.java), transitionActivityOptions.toBundle())
-        }
-    }
 
     //二维码扫描结果
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+
         if (result != null) {
             if (result.contents == null) {
                 showToast("扫描异常")
@@ -118,8 +123,21 @@ class MainActivity : BaseActivity(), MainContract.View {
                     }
                 }
             }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data)
+        }
+
+        if (requestCode == 199) {
+            if (screenCapture == null) return
+
+            val mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data)
+            if (mediaProjection == null) {
+                Log.e("@@", "media projection is null")
+                return
+            }
+            with(screenCapture!!) {
+                mediaProjection.createVirtualDisplay("test", width, height, 1,
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                        mImageReader.surface, null, null)
+            }
         }
     }
 
@@ -155,8 +173,19 @@ class MainActivity : BaseActivity(), MainContract.View {
         blurringView.visiable()
     }
 
-    override fun onStop() {
-        super.onStop()
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onCaptureScreen(screenCaptureResult: ScreenCaptureResult){
+        if(screenCaptureResult.code == ScreenCaptureResult.REQUEST){
+            val bitmap = screenCapture?.startCapture()
+            screenCaptureResult.bitmap = bitmap
+            screenCaptureResult.code = ScreenCaptureResult.RESPONSE
+            EventBus.getDefault().post(screenCaptureResult)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
         EventBus.getDefault().unregister(this)
     }
 }

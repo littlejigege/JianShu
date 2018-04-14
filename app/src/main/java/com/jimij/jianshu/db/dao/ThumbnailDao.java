@@ -17,6 +17,9 @@ public interface ThumbnailDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert( Thumbnail thumbnail );
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    void insertIgnore( Thumbnail thumbnail );
+
     @Query("SELECT * FROM thumbnails WHERE path=:path LIMIT 1")
     Thumbnail getThumbnail(String path);
 }

@@ -41,7 +41,7 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
             mServerController = service as HttpServerService.ServiceController
             mServerController?.start()
             mServerController?.onIntercept { message ->
-                inUiThread { getView()!!.requestPermission(message.ip) }
+                inUiThread { getView()?.requestPermission(message.ip) }
                 while (!isInterceptPass) {
                 }
                 isInterceptPass = false
@@ -51,11 +51,11 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
 
     }
 
-    fun getPermission(): Boolean {
-        return true
-    }
-
-    private fun getView(): MainContract.View? = if (view == null || view!!.lifecycle.currentState != Lifecycle.State.RESUMED) null else view as MainContract.View
+    private fun getView(): MainContract.View? =
+            if (view == null)
+                null
+            else
+                view as MainContract.View
 
     override fun startServer() {
         getView()?.onServerStart()
@@ -75,10 +75,11 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
     }
 
     override fun onStateChanged(source: LifecycleOwner?, event: Lifecycle.Event?) {
-        if (event == Lifecycle.Event.ON_DESTROY) {
+        if (event == Lifecycle.Event.ON_STOP) {
             view = null
+        }else{
+            view = source as MainActivity
         }
-        view = source as MainActivity
     }
 
     override fun copyText(text: String) {

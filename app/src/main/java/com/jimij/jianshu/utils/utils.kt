@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Point
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.wifi.WifiManager
@@ -13,6 +14,7 @@ import com.google.gson.Gson
 import com.jimij.jianshu.App
 import com.mobile.utils.dp2px
 import com.mobile.utils.gaussBlud
+import com.mobile.utils.windowManager
 import com.weechan.httpserver.httpserver.HttpResponse
 
 /**
@@ -83,4 +85,10 @@ fun createBitmapFromView(view: View, scale: Float = 1f): Bitmap? {
 
 fun viewToBlurBitmap(view: View): Bitmap? {
     return gaussBlud(createBitmapFromView(view)!!, 25f)
+}
+
+fun getScreenSize(): Point {
+    val point = Point()
+    windowManager.defaultDisplay.getRealSize(point)
+    return point
 }

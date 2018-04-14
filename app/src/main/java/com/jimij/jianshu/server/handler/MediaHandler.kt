@@ -3,6 +3,7 @@ package com.jimij.jianshu.server.handler
 
 
 import com.google.gson.Gson
+import com.jimij.jianshu.data.MFileResponse
 import com.jimij.jianshu.data.MediaRepository
 import com.weechan.httpserver.httpserver.HttpRequest
 import com.weechan.httpserver.httpserver.HttpResponse
@@ -25,11 +26,11 @@ class MediaHandler : BaseHandler() {
         var jsonIn : InputStream? = null
         println(type)
         when (type) {
-            "music" -> jsonIn = Gson().toJson(MediaRepository.getMusic()).byteInputStream()
-            "document" -> jsonIn = Gson().toJson(MediaRepository.getDocument()) .byteInputStream()
-            "video" ->jsonIn = Gson().toJson(MediaRepository.getVideo()).byteInputStream()
-            "photoDir" -> jsonIn = Gson().toJson(MediaRepository.getPhotosDirectory()).byteInputStream()
-            "photo" -> jsonIn = Gson().toJson(MediaRepository.getPhotos(request.getRequestArgument("path"))).byteInputStream()
+            "music" -> jsonIn = Gson().toJson(MFileResponse(0,MediaRepository.getMusic())).byteInputStream()
+            "document" -> jsonIn = Gson().toJson((MFileResponse(0,MediaRepository.getDocument()))).byteInputStream()
+            "video" ->jsonIn = Gson().toJson((MFileResponse(0,MediaRepository.getVideo()))).byteInputStream()
+            "photoDir" -> jsonIn = Gson().toJson((MFileResponse(0,MediaRepository.getPhotosDirectory()))).byteInputStream()
+            "photo" -> jsonIn = Gson().toJson((MFileResponse(0,MediaRepository.getPhotos(request.getRequestArgument("path"))))).byteInputStream()
         }
 
         response.write {

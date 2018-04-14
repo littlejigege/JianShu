@@ -5,6 +5,7 @@ import android.content.Context
 import com.jimij.jianshu.data.MediaRepository
 
 import com.mobile.utils.Utils
+import com.squareup.leakcanary.LeakCanary
 
 
 import kotlin.properties.Delegates
@@ -43,6 +44,7 @@ class App : Application() {
         }
         //初始化suger
 //        ZXingLibrary.initDisplayOpinion(this)
+        LeakCanary.install(this);
         Utils.init(this)
         ctx = this
     }

@@ -43,13 +43,6 @@ class HttpServerBuilder {
             return this
         }
 
-//        fun encode(charSet : Charset){
-//            this.encodeCharset = charSet.name()
-//        }
-//
-//        fun decode(charSet : Charset){
-//            this.decodeCharset = charSet.name()
-//        }
 
         fun getHttpServer(): HttpServer {
             val server = HttpServer(port)

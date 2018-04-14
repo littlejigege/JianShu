@@ -31,7 +31,7 @@ class HttpMessageReslover {
             }
 
 
-            val requestLine = RequestLine(URLDecoder.decode(firstLine, "utf-8"))
+            val requestLine = RequestLine(firstLine)
             val requestHeaders = RequestHeaders(headers.toString())
             val requestBody = RequestBody(ins, requestHeaders.get("content-type"), requestHeaders.get("content-length")?.toLongOrNull(),requestHeaders.get("boundary"))
 

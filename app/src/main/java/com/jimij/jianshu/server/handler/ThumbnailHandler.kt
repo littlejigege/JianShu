@@ -1,6 +1,7 @@
 package com.jimij.jianshu.server.handler
 
 import android.util.Base64
+import com.jimij.jianshu.data.BaseResponse
 import com.jimij.jianshu.data.MediaRepository
 import com.jimij.jianshu.utils.writeObject
 import com.mobile.utils.JsonMaker
@@ -19,14 +20,16 @@ class ThumbnailHandler : BaseHandler(){
         val path = request.getRequestArgument("path")
         val type = request.getRequestArgument("type")
         var mType : Int = -1
-        if(type == "photo") mType = 1 else if (type == "video") mType = 0
+        if(type == "photo" ){
+            mType = 1
+        } else if (type == "video"){
+            mType = 0
+        }else if(type == "app"){
+            mType = 2
+        } else mType = 0
 
         if(path == null || type == null) {
-            response.writeObject(JsonMaker.make {
-                objects { "code"- -2
-                    "errorMsg"-"参数不全,需要type与path"
-                }
-            })
+            response.writeObject(BaseResponse(-2,"参数不全,检查path和type"))
             return
         }
         val thumbnail = MediaRepository.getThumbnail(path,mType)

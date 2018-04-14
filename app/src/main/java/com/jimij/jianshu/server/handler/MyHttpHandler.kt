@@ -43,7 +43,9 @@ class MyHttpHandler : BaseHandler() {
         } else {
             val mFiles = mutableListOf<MFile>()
             file.listFiles().forEach {
-                mFiles.add(MFile(it.isDirectory, it.length(), it.path, SimpleDateFormat.getDateInstance().format(Date(it.lastModified()))))
+                mFiles.add(MFile(it.length(), it.path,
+                        SimpleDateFormat.getDateInstance().format(Date(it.lastModified())),
+                        isDirectory = it.isDirectory))
             }
             mFiles.sortWith(Comparator { o1, o2 ->
                 fun getName(file: MFile) = file.path.substring(file.path.lastIndexOf("/") + 1, file.path.lastIndex)
