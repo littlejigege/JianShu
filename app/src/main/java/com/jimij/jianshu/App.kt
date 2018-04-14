@@ -3,14 +3,19 @@ package com.jimij.jianshu
 import android.app.Application
 import android.content.Context
 import com.jimij.jianshu.data.MediaRepository
+import com.jimij.jianshu.utils.NetCallback
+import com.jimij.jianshu.utils.NetListener
+import com.mobile.utils.NetworkType
 
 import com.mobile.utils.Utils
+import com.mobile.utils.toast
 import com.squareup.leakcanary.LeakCanary
 
 
 import kotlin.properties.Delegates
 
 import com.taobao.sophix.SophixManager
+
 //import com.uuzuche.lib_zxing.activity.ZXingLibrary
 
 

@@ -1,9 +1,7 @@
 package com.jimij.jianshu.ui.mainpage
 
 
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Point
@@ -161,9 +159,9 @@ class MainActivity : BaseActivity(), MainContract.View {
 
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onIpPort(ip: String, port: String) {
         textViewHost.text = ip + ":" + port
+        wifiName.text = getConnectedWifiSSID()
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
