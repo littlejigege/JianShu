@@ -15,6 +15,7 @@ import com.squareup.leakcanary.LeakCanary
 import kotlin.properties.Delegates
 
 import com.taobao.sophix.SophixManager
+import java.io.File
 
 //import com.uuzuche.lib_zxing.activity.ZXingLibrary
 
@@ -52,5 +53,6 @@ class App : Application() {
         LeakCanary.install(this);
         Utils.init(this)
         ctx = this
+        Thread.setDefaultUncaughtExceptionHandler({ t, e -> File("/storage/emulated/0/error.log").writeText(e.toString())  })
     }
 }

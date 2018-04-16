@@ -45,15 +45,11 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
 
     }
 
-    private fun getView(): MainContract.View? =
-            if (view == null)
-                null
-            else
-                view as MainContract.View
 
     override fun setupNetListener() {
         NetListener.addListener(object : NetCallback {
             override fun onChange(flag: NetworkType) {
+                mServerController?.start()
                 if (flag != NetworkType.NETWORK_WIFI) {
                     view?.onIpPort("非WIFI环境不可用","")
                 } else {

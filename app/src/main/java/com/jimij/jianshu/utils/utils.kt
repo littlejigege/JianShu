@@ -8,6 +8,7 @@ import android.graphics.Point
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.wifi.WifiManager
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import com.google.gson.Gson
@@ -17,8 +18,14 @@ import com.mobile.utils.gaussBlud
 import com.mobile.utils.windowManager
 import com.mobile.utils.*
 import com.weechan.httpserver.httpserver.HttpResponse
+import com.weechan.httpserver.httpserver.uitls.writeTo
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlin.concurrent.thread
 
 /**
@@ -79,7 +86,7 @@ fun createBitmapFromView(view: View, scale: Float = 1f): Bitmap? {
             canvas.drawColor(Color.WHITE) // 防止 View 上面有些区域空白导致最终 Bitmap 上有些区域变黑
             canvas.scale(scale, scale)
             view.draw(canvas)
-            canvas.drawColor(0x88000000.toInt()) // 防止 View 上面有些区域空白导致最终 Bitmap 上有些区域变黑
+            canvas.drawColor(0x88000000.toInt()) // hei
             canvas.restore()
             canvas.setBitmap(null)
         }
@@ -132,4 +139,63 @@ fun getScreenSize(): Point {
     val point = Point()
     windowManager.defaultDisplay.getRealSize(point)
     return point
+}
+
+fun zipFiles(srcfile: Array<File>, zipfile: HttpResponse) {
+    val buf = ByteArray(1024)
+    try {
+        //ZipOutputStream类：完成文件或文件夹的压缩
+        zipfile.write {
+            val out = ZipOutputStream(this)
+            for (i in srcfile.indices) {
+                val `in` = FileInputStream(srcfile[i])
+                out.putNextEntry(ZipEntry(srcfile[i].getName()))
+                var len: Int = 0
+                while ({ len = `in`.read(buf);len > 0 }.invoke()) {
+                    out.write(buf, 0, len)
+                }
+                out.closeEntry()
+                `in`.close()
+            }
+            out.close()
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+private fun ZipOutputStream.zipFolderFrom(src: String) {
+    zip(File(src).listFiles(), File(src).name)
+}
+
+fun ZipOutputStream.zipFrom(vararg srcs: String) {
+    val files = srcs.map { File(it) }
+
+    files.forEach {
+        if (it.isFile) {
+            zipFileFrom(it.path)
+        } else if (it.isDirectory) {
+            zipFolderFrom(it.path)
+        }
+    }
+}
+
+private fun ZipOutputStream.zipFileFrom(src: String) {
+    val file = File(src)
+    this.zip(arrayOf(file), null)
+}
+
+private fun ZipOutputStream.zip(files: Array<File>, path: String?) {
+    val prefix = if (path == null) "" else "$path/"
+    files.forEach {
+        if (it.isFile) {
+            val entry = ZipEntry("$prefix${it.name}")
+            val ins = it.inputStream().buffered()
+            this.putNextEntry(entry)
+            ins.writeTo(this, false, DEFAULT_BUFFER_SIZE)
+            this.closeEntry()
+        } else {
+            this.zip(it.listFiles(), "$prefix${it.name}")
+        }
+    }
 }

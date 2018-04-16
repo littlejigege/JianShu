@@ -27,8 +27,10 @@ fun InputStream.writeTo(outputStream: OutputStream, autoClose: Boolean = false, 
     bw.flush()
 
     if (autoClose) {
-        close()
+        bw.close()
     }
+
+    this.close()
 }
 
 fun InputStream.string(): String {

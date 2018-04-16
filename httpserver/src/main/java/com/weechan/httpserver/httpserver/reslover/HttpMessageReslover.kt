@@ -1,5 +1,6 @@
 package com.example.androidservice.httpserver.reslover
 
+import android.util.Log
 import com.weechan.httpserver.httpserver.reslover.reslovebean.RequestBody
 import com.example.androidservice.httpserver.reslover.reslovebean.RequestHeaders
 import com.example.androidservice.httpserver.reslover.reslovebean.RequestLine
@@ -29,6 +30,7 @@ class HttpMessageReslover {
                 headers.append(tempStr + "\r\n")
                 tempStr = ins.readLine()
             }
+
 
 
             val requestLine = RequestLine(firstLine)

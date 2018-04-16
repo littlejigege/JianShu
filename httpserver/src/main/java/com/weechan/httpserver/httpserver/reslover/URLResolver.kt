@@ -1,5 +1,6 @@
 package com.example.androidservice.httpserver.reslover
 
+import android.util.Log
 import java.net.URLDecoder
 
 /**
@@ -22,19 +23,23 @@ class URLResolver {
         fun getRequestArgument(realPath: String): HashMap<String, String> {
 
             val argumentMap = hashMapOf<String,String>()
+            
+            try{
 
-//            Log.e("REALPATH", realPath)
-            val router = getRequestRouter(realPath)
-//            Log.e("ROUTER", router)
+                val router = getRequestRouter(realPath)
 
-            if(realPath == router) return argumentMap
+                if(realPath == router) return argumentMap
 
-            val arguments = realPath.substring(router.length+1, realPath.length)
-            val args = arguments.split("&")
+                val arguments = realPath.substring(router.length+1, realPath.length)
+                val args = arguments.split("&")
 
-            args.forEach {
-                val pair = it.split('=')
-                argumentMap.put(URLDecoder.decode(pair[0],"utf-8"),URLDecoder.decode(pair[1],"utf-8"))
+                args.forEach {
+                    val pair = it.split('=')
+                    argumentMap.put(URLDecoder.decode(pair[0],"utf-8"),URLDecoder.decode(pair[1],"utf-8"))
+                }
+
+            }catch (e : Exception){
+                Log.e("URLResolver", "解析url异常,请检查URL的格式是否符合规范")
             }
 
             return argumentMap

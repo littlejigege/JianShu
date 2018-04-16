@@ -6,6 +6,7 @@ import com.weechan.httpserver.httpserver.uitls.writeTo
 import java.io.File
 import java.io.OutputStream
 import java.io.RandomAccessFile
+import java.net.URLDecoder
 import java.nio.charset.Charset
 import kotlin.properties.Delegates
 
@@ -22,6 +23,7 @@ class ResponseBuilder() {
 
     var handlerExist  : Boolean = false
     var mRequestMessage: RequestMessage by Delegates.notNull()
+    val requestPath : String by lazy { URLDecoder.decode(mRequestMessage.requestPath,"utf-8") }
     var responseCharSet : Charset = Charset.forName("utf-8")
 
     companion object {
@@ -39,11 +41,9 @@ class ResponseBuilder() {
     fun build(): HttpResponse = response
 
     private fun setUp(){
-        file = File(mRequestMessage.requestPath)
+        file = File(requestPath)
         if (file.exists() && file.isFile) fileSize = file.length()
         range = resloveRange(mRequestMessage.getHead("range"), fileSize)
-
-
     }
 
     private fun resloveResponse() {
@@ -53,6 +53,8 @@ class ResponseBuilder() {
     }
 
     private fun setHttpState() {
+
+//        Log.e("ResponseBuilder", file.exists().toString())
 
         if ((!file.exists() || !file.isFile) && !handlerExist) {
             response.httpState = HttpState.Not_Found_404
@@ -75,8 +77,6 @@ class ResponseBuilder() {
                 "Accept-Ranges" - " bytes\r\n"
             }
         }
-
-
     }
 
     private fun setBody() {
@@ -86,7 +86,6 @@ class ResponseBuilder() {
             if (range != null) {
                 response.write {
                     readAndSendPartFile(this)
-
                 }
             } else {
                 response.write {
@@ -99,7 +98,7 @@ class ResponseBuilder() {
     private fun readAndSendPartFile(output: OutputStream) {
         val (from, to) = range!!
         var length = to - from + 1
-        val raf = RandomAccessFile(mRequestMessage.requestPath, "r")
+        val raf = RandomAccessFile(requestPath, "r")
         raf.seek(from)
 
         val buf = ByteArray(1024 * 1024 * 2)
@@ -117,7 +116,6 @@ class ResponseBuilder() {
             Log.e("ResponseBuilder",length.toString())
         }
 
-
     }
 
     private fun resloveRange(range: String?, fileSize: Long?): Pair<Long, Long>? {
@@ -127,5 +125,7 @@ class ResponseBuilder() {
         if (to == -1L) to = fileSize-1
         return Pair(from, to)
     }
+
+
 
 }
