@@ -6,6 +6,7 @@ import android.os.Binder
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
 import com.example.androidservice.httpserver.reslover.reslovebean.RequestMessage
+import com.jimij.jianshu.server.handler.*
 import com.weechan.httpserver.httpserver.HttpServerBuilder
 import java.net.Socket
 
@@ -19,8 +20,7 @@ class HttpServerService : Service() {
     var intercept: ((RequestMessage) -> Boolean)? = null
 
     private val mServer by lazy {
-        HttpServerBuilder
-                .handlerPackage("server.handler")
+        val server = HttpServerBuilder
                 .with(this)
                 .port(8080)
                 .intercept { message ->
@@ -28,6 +28,19 @@ class HttpServerService : Service() {
                     intercept?.invoke(message)?:false
                 }
                 .getHttpServer()
+
+        server.addHandler(ApplicationHandler::class.java)
+        server.addHandler(CaptureHandler::class.java)
+        server.addHandler(DeviceInfoHandler::class.java)
+        server.addHandler(Download::class.java)
+        server.addHandler(FileHandler::class.java)
+        server.addHandler(MainHandler::class.java)
+        server.addHandler(MediaHandler::class.java)
+        server.addHandler(MyHttpHandler::class.java)
+        server.addHandler(ThumbnailHandler::class.java)
+        server.addHandler(UploadHandler::class.java)
+
+        server
     }
 
     override fun onCreate() {

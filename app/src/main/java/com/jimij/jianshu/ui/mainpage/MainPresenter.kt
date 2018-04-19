@@ -12,6 +12,7 @@ import com.jimij.jianshu.server.HttpServerService
 import com.jimij.jianshu.utils.NetCallback
 import com.jimij.jianshu.utils.NetListener
 import com.mobile.utils.NetworkType
+import com.mobile.utils.doAfter
 import com.mobile.utils.inUiThread
 import com.mobile.utils.showToast
 import com.weechan.httpserver.httpserver.uitls.getHostIp
@@ -19,8 +20,11 @@ import com.weechan.httpserver.httpserver.uitls.getHostIp
 /**
  * Created by jimiji on 2018/4/2.
  */
-class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObserver {
-    var view: MainActivity? = null
+class MainPresenter(var view : MainActivity?) : MainContract.Presenter<MainActivity> {
+    override fun stopPresenter() {
+        view = null
+    }
+
     var isInterceptPass = false
     var isPass = false
     //遥控器
@@ -35,7 +39,7 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
             mServerController = service as HttpServerService.ServiceController
             mServerController?.start()
             mServerController?.onIntercept { message ->
-                inUiThread { getView()!!.requestPermission(message.ip) }
+                inUiThread { getView()?.requestPermission(message.ip) }
                 while (!isInterceptPass) {
                 }
                 isInterceptPass = false
@@ -51,9 +55,9 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
             override fun onChange(flag: NetworkType) {
                 mServerController?.start()
                 if (flag != NetworkType.NETWORK_WIFI) {
-                    view?.onIpPort("非WIFI环境不可用","")
+                    view?.onIpPort("非WIFI环境不可用", "")
                 } else {
-                    view?.onIpPort(getHostIp()!!,"8080")
+                    view?.onIpPort(getHostIp()!!, "8080")
                 }
             }
         })
@@ -68,12 +72,7 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
     }
 
 
-
-    fun getPermission(): Boolean {
-        return true
-    }
-
-    private fun getView(): MainContract.View? = if (view == null || view!!.lifecycle.currentState != Lifecycle.State.RESUMED) null else view as MainContract.View
+    private fun getView(): MainContract.View? = view
 
     override fun startServer() {
         setupNetListener()
@@ -85,6 +84,9 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
         }
         getView()?.onServerStarted()
         getView()?.onIpPort(getHostIp()!!, "8080")
+        doAfter(1000) {
+            getView()?.onIpPort(getHostIp()!!, "8080")
+        }
     }
 
     override fun stopServer() {
@@ -93,13 +95,9 @@ class MainPresenter : MainContract.Presenter<MainActivity>, GenericLifecycleObse
         getView()?.onServerStopped()
     }
 
-    override fun onStateChanged(source: LifecycleOwner?, event: Lifecycle.Event?) {
-        if (event == Lifecycle.Event.ON_STOP) {
-            view = null
-        }else{
-            view = source as MainActivity
-        }
-    }
+
+
+
 
     override fun copyText(text: String) {
         val cm = App.ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

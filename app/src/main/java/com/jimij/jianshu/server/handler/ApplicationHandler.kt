@@ -1,6 +1,7 @@
 package com.jimij.jianshu.server.handler
 
 import com.google.gson.Gson
+import com.jimij.jianshu.data.MAppResponse
 import com.jimij.jianshu.data.MFileResponse
 import com.jimij.jianshu.data.MediaRepository
 import com.weechan.httpserver.httpserver.HttpRequest
@@ -23,7 +24,7 @@ class ApplicationHandler : BaseHandler() {
             "Access-Control-Allow-Methods" - "POST,GET"
         }
 
-        response.write { Gson().toJson(MFileResponse(0,MediaRepository.getApplications())).byteInputStream().writeTo(this) }
+        response.write { Gson().toJson(MAppResponse(0,MediaRepository.getApplications())).byteInputStream().writeTo(this) }
     }
 
 }

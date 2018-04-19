@@ -22,6 +22,7 @@ import kotlinx.coroutines.experimental.async
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.Semaphore
 import java.util.stream.Stream
 import kotlin.concurrent.thread
 
@@ -37,14 +38,14 @@ object MediaRepository {
 
 
     private val mContentResolver: ContentResolver = App.ctx.contentResolver
-    private val thumbnailsDao = Room.databaseBuilder(App.ctx, ThumbnailDatabase::class.java,"thumbnails").build().thumbnailDao()
+    private val thumbnailsDao = Room.databaseBuilder(App.ctx, ThumbnailDatabase::class.java, "thumbnails").build().thumbnailDao()
     private val formatter = SimpleDateFormat.getDateInstance()
 
     var musics: List<MFile>? = null
     var docs: List<MFile>? = null
     var videos: List<MFile>? = null
     var pictures: List<MFile>? = null
-    var apps: List<MFile>? = null
+    var apps: List<AppInfo>? = null
 
     init {
         thread {
@@ -72,7 +73,7 @@ object MediaRepository {
                 var initSize = (cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE))).toLong()
                 val location = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
                 if (initSize == 0L) initSize = File(location).length()
-                val info = MFile(initSize, location, formatter.format(Date( File(location).lastModified())))
+                val info = MFile(initSize, location, formatter.format(Date(File(location).lastModified())))
                 list.add(info)
             } while (cursor.moveToNext())
 
@@ -108,7 +109,7 @@ object MediaRepository {
             do {
                 val location = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA))
                 val initSize = java.lang.Long.parseLong(cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.SIZE)))
-                val info = MFile(initSize, location, formatter.format(Date( File(location).lastModified())))
+                val info = MFile(initSize, location, formatter.format(Date(File(location).lastModified())))
                 list.add(info)
             } while (cursor.moveToNext())
 
@@ -139,7 +140,7 @@ object MediaRepository {
             do {
                 val location = cursor.getString(cursor.getColumnIndex(MediaStore.Video.VideoColumns.DATA))
                 val initSize = java.lang.Long.parseLong(cursor.getString(cursor.getColumnIndex(MediaStore.Video.VideoColumns.SIZE)))
-                val info = MFile(initSize, location, formatter.format(Date( File(location).lastModified())))
+                val info = MFile(initSize, location, formatter.format(Date(File(location).lastModified())))
                 list.add(info)
             } while (cursor.moveToNext())
         }
@@ -174,7 +175,7 @@ object MediaRepository {
 
         addPath.forEach {
             val location = it
-            val folderInfo = MFile(0, location,isDirectory = true)
+            val folderInfo = MFile(0, location, isDirectory = true)
             list.add(folderInfo)
         }
         this.pictures = list
@@ -186,31 +187,41 @@ object MediaRepository {
     fun getPhotos(path: String?): List<MFile>? {
         if (path == null) return null
         val list = mutableListOf<MFile>()
-        list.addAll(File(path).listFiles().filter { it.isFile }.map { MFile(it.length(), it.path, formatter.format(Date(it.lastModified()))) })
+        list.addAll(File(path).listFiles().filter { it.isFile }.map { MFile(it.length(), it.path, formatter.format(Date(it.lastModified()))) }.filter {
+            it.path.endsWith(".jpg") ||
+                    it.path.endsWith(".png") ||
+                    it.path.endsWith(".jpeg") ||
+                    it.path.endsWith(".gif") ||
+                    it.path.endsWith(".bmp") ||
+                    it.path.endsWith(".jpg") ||
+                    it.path.endsWith(".webp")||
+                    it.path.endsWith(".tif")||
+                    it.path.endsWith(".tiff")
+        })
         return list
     }
 
-    private fun cutBitmapToThumbnails(path : String , type : Int): Bitmap? {
+    private fun cutBitmapToThumbnails(path: String, type: Int): Bitmap? {
 
         val file = File(path)
-        if(!file.exists()) return null;
+        if (!file.exists()) return null;
 
-        if(type == 0 ) return ThumbnailUtils.createVideoThumbnail(path, MICRO_KIND)
+        if (type == 0) return ThumbnailUtils.createVideoThumbnail(path, MICRO_KIND)
 
-        if(type == 1 ){
+        if (type == 1) {
             val bitmap = BitmapFactory.decodeFile(path)
-            return ThumbnailUtils.extractThumbnail(bitmap ,150 ,100)
+            return ThumbnailUtils.extractThumbnail(bitmap, 150, 100)
         }
 
         return null
     }
 
     @Synchronized
-    fun getApplications(): List<MFile>? {
+    fun getApplications(): List<AppInfo>? {
 
         if (apps != null) return apps
 
-        val list = mutableListOf<MFile>()
+        val list = mutableListOf<AppInfo>()
         val pm = App.ctx.packageManager
         var sourceDir: String
 
@@ -220,9 +231,10 @@ object MediaRepository {
             sourceDir = i.sourceDir
             val initSize = File(sourceDir).length()
             val location = sourceDir
-            val app = MFile(initSize, location,formatter.format(Date( File(location).lastModified())))
+
+            val app = AppInfo(initSize, location, formatter.format(Date(File(location).lastModified())), i.loadLabel(pm).toString())
             list.add(app)
-            thumbnailsDao.insertIgnore(Thumbnail(location,Base64.encodeToString(pm.getApplicationIcon(i).toBitmap()?.toBytes(),Base64.DEFAULT)))
+            thumbnailsDao.insertIgnore(Thumbnail(location, Base64.encodeToString(pm.getApplicationIcon(i).toBitmap()?.toBytes(), Base64.DEFAULT)))
         }
 
         apps = list
@@ -230,24 +242,27 @@ object MediaRepository {
         return apps
     }
 
-    fun saveThumbnail( thumbnail : Thumbnail){
+    fun saveThumbnail(thumbnail: Thumbnail) {
         thumbnailsDao.insert(thumbnail)
     }
 
-    fun getThumbnail( path : String , type: Int): Thumbnail? {
+
+
+    fun getThumbnail(path: String, type: Int): Thumbnail? {
 
         val thumbnail = thumbnailsDao.getThumbnail(path)
-        if(type == 2) return thumbnail
+        if (type == 2) return thumbnail
 
-        if(thumbnail == null){
-            val bitmap = cutBitmapToThumbnails(path,type)
-            if(bitmap != null){
+        if (thumbnail == null) {
+            var bitmap = cutBitmapToThumbnails(path, type)
+            if (bitmap != null) {
                 val bytes = bitmap.toBytes()
-                val t = Thumbnail(path, Base64.encodeToString(bytes,Base64.DEFAULT))
+                bitmap.recycle()
+                bitmap = null
+                val t = Thumbnail(path, Base64.encodeToString(bytes, Base64.DEFAULT))
                 async(CommonPool) { saveThumbnail(t) }
                 return t
             }
-
         }
         return thumbnail
     }

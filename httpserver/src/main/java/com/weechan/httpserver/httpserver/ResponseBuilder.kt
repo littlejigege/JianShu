@@ -89,7 +89,7 @@ class ResponseBuilder() {
                 }
             } else {
                 response.write {
-                    file.inputStream().writeTo(this, true)
+                    file.inputStream().writeTo(this)
                 }
             }
         }

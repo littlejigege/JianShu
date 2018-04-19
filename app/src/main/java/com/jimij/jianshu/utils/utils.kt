@@ -121,6 +121,10 @@ object NetListener {
                             ls.forEach {
                                 inUiThread { it.onChange(type_new) }
                             }
+                            doAfter(2000) {
+                                Log.e("NetListener", "ASDSA")
+                                ls.forEach { it.onChange(type_new) }
+                            }
                             type = type_new
                         }
                     }
@@ -168,16 +172,21 @@ private fun ZipOutputStream.zipFolderFrom(src: String) {
     zip(File(src).listFiles(), File(src).name)
 }
 
-fun ZipOutputStream.zipFrom(vararg srcs: String) {
+fun ZipOutputStream.zipFrom(vararg srcs: String): ZipOutputStream {
     val files = srcs.map { File(it) }
 
     files.forEach {
+
         if (it.isFile) {
             zipFileFrom(it.path)
-        } else if (it.isDirectory) {
+        } else {
             zipFolderFrom(it.path)
         }
     }
+
+    flush()
+
+    return this
 }
 
 private fun ZipOutputStream.zipFileFrom(src: String) {
@@ -189,10 +198,11 @@ private fun ZipOutputStream.zip(files: Array<File>, path: String?) {
     val prefix = if (path == null) "" else "$path/"
     files.forEach {
         if (it.isFile) {
+            Log.e("压缩中", "压缩 : ${it.path}")
             val entry = ZipEntry("$prefix${it.name}")
             val ins = it.inputStream().buffered()
             this.putNextEntry(entry)
-            ins.writeTo(this, false, DEFAULT_BUFFER_SIZE)
+            ins.writeTo(this, DEFAULT_BUFFER_SIZE)
             this.closeEntry()
         } else {
             this.zip(it.listFiles(), "$prefix${it.name}")

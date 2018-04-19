@@ -26,15 +26,16 @@ class Download : BaseHandler() {
     override fun doGet(request: HttpRequest, response: HttpResponse) {
         this.response = response
 
+
         val path = request.getRequestArgument("path") ?: return
         val preview = request.getRequestArgument("preview")
         val type: String = if (preview == "true") "inline" else if (preview == "false") "attachment" else "attachment"
         var fileName = ""
+        this.file = File(path)
 
-        if (!path.contains("|")) {
-            this.file = File(path)
+        if (!path.contains("|") && file.exists() && File(path).isFile) {
 
-            if (file.exists() && file.isFile) fileSize = file.length()
+            fileSize = file.length()
             range = resloveRange(request.getRequestHead("range"), fileSize)
 
             fileName = path.substring(path.lastIndexOf("/") + 1, path.length)
@@ -46,13 +47,19 @@ class Download : BaseHandler() {
             setBody()
         } else {
 
-            val files: Array<File> = path.split("|").map { File(it) }.filter { it.exists() }.toTypedArray()
+            fileName = "download.zip"
 
-            fileName = "${files[0].name}等${files.size}个文件.zip"
+            if(file.exists() && file.isDirectory){
+                response.write { ZipOutputStream(this).zipFrom(file.path).close()}
+            }else{
+                val files: Array<File> = path.split("|").map { File(it) }.filter { it.exists() }.toTypedArray()
 
-            response.write {
-                ZipOutputStream(this).zipFrom(*files.map { it.path }.toTypedArray())
+
+                response.write {
+                    ZipOutputStream(this).zipFrom(*files.map { it.path }.toTypedArray()).close()
+                }
             }
+
 
             response.httpState = HttpState.OK_200
         }
@@ -84,7 +91,7 @@ class Download : BaseHandler() {
             }
         } else {
             response.write {
-                file.inputStream().writeTo(this, true)
+                file.inputStream().writeTo(this)
             }
         }
 

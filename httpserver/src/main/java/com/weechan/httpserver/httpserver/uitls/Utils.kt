@@ -14,7 +14,7 @@ import java.util.regex.Pattern
  * Created by 铖哥 on 2018/3/18.
  */
 
-fun InputStream.writeTo(outputStream: OutputStream, autoClose: Boolean = false, bufferSize: Int = 1024*2) {
+fun InputStream.writeTo(outputStream: OutputStream,  bufferSize: Int = 1024*2) {
     val buffer = ByteArray(bufferSize)
     val br = this.buffered()
     val bw = outputStream.buffered()
@@ -25,12 +25,8 @@ fun InputStream.writeTo(outputStream: OutputStream, autoClose: Boolean = false, 
     }
 
     bw.flush()
+    close()
 
-    if (autoClose) {
-        bw.close()
-    }
-
-    this.close()
 }
 
 fun InputStream.string(): String {

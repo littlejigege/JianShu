@@ -37,7 +37,7 @@ class MainActivity : BaseActivity(), MainContract.View {
     private var screenCapture: ScreenCapture? = null
     private var dialog: MaterialDialog? = null
     //与活动生命周期关联
-    private val presenter: MainPresenter = MainPresenter().apply { lifecycle.addObserver(this) }
+    private lateinit var presenter: MainPresenter
 
     override fun requestPermission(ip: String) {
         if (dialog == null) {
@@ -54,8 +54,14 @@ class MainActivity : BaseActivity(), MainContract.View {
         dialog?.show()
     }
 
+    override fun onResume() {
+        super.onResume()
+        presenter.view = this
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        presenter = MainPresenter(this)
         EventBus.getDefault().register(this)
         setContentView(R.layout.activity_main)
         initUI()
@@ -69,7 +75,11 @@ class MainActivity : BaseActivity(), MainContract.View {
         startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), 199)
         screenCapture = ScreenCapture(point.x, point.y)
 
+    }
 
+    override fun onStop() {
+        super.onStop()
+        presenter.stopPresenter()
     }
 
     private fun initUI() {

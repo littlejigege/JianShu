@@ -10,11 +10,11 @@ import com.weechan.httpserver.httpserver.HttpState
 interface HttpHandler{
     fun doGet(request : HttpRequest, response: HttpResponse)
     fun doPost(request : HttpRequest, response: HttpResponse)
+    fun doOptions(request: HttpRequest, response: HttpResponse) {
+    }
 }
 
 abstract class BaseHandler : HttpHandler{
-
-
 
     override fun doGet(request: HttpRequest, response: HttpResponse) {
 
@@ -26,4 +26,7 @@ abstract class BaseHandler : HttpHandler{
         response.httpState = HttpState.Method_Not_Allowed
     }
 
+    override fun doOptions(request: HttpRequest, response: HttpResponse) {
+         response.httpState = HttpState.Method_Not_Allowed
+    }
 }

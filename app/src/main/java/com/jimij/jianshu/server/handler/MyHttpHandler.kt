@@ -61,4 +61,19 @@ class MyHttpHandler : BaseHandler() {
         output.write(resp.toByteArray())
     }
 
+    fun calculateDirectorySize(dir: String): Long {
+        val file = File(dir)
+
+        if(!file.exists()) return 0
+
+        if(file.isFile) return file.length()
+
+        var totoalSize : Long = 0L
+
+        file.listFiles().forEach { totoalSize += calculateDirectorySize(it.path) }
+
+        return totoalSize
+
+    }
+
 }

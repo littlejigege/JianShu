@@ -19,7 +19,7 @@ import kotlin.concurrent.thread
  */
 class HttpServer constructor(val port: Int) {
 
-    private val pool: ExecutorService by lazy { Executors.newCachedThreadPool() }
+    private val pool: ExecutorService by lazy { Executors.newFixedThreadPool(10) }
     private val routerMapper = mutableMapOf<String, Class<*>>()
     private var serverSocket: ServerSocket? = null
 
@@ -117,6 +117,7 @@ class HttpServer constructor(val port: Int) {
                     when (requestMethod) {
                         "POST" -> handler?.doPost(request, response)
                         "GET" -> handler?.doGet(request, response)
+                        "OPTIONS" -> handler?.doOptions(request,response)
                         else -> run { out.write(HttpState.Method_Not_Allowed.toByteArray()) }
                     }
                     process(response)

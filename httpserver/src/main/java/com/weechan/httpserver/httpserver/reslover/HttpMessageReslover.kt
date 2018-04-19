@@ -22,6 +22,8 @@ class HttpMessageReslover {
 
             val firstLine = ins.readLine() ?: return null
 
+            Log.e("HttpMessageReslover", firstLine.toString())
+
             val headers = StringBuffer()
 
             var tempStr = ins.readLine()

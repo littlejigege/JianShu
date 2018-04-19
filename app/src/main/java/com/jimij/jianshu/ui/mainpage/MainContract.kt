@@ -25,5 +25,6 @@ interface MainContract {
         fun addWhiter(ip:String)
         fun clearWhiter()
         fun setupNetListener()
+        fun stopPresenter()
     }
 }
