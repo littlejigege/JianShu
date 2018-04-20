@@ -1,6 +1,7 @@
 package com.jimij.jianshu.server.handler
 
 import com.jimij.jianshu.data.BaseResponse
+import com.jimij.jianshu.data.MediaRepository
 import com.jimij.jianshu.data.json
 import com.jimij.jianshu.utils.writeObject
 import com.mobile.utils.JsonMaker
@@ -46,16 +47,22 @@ class FileHandler : BaseHandler() {
             return
         }
 
+        var allDelete = true
+
         when (operation) {
             "delete" -> kotlin.run {
                 if (path.contains("|")) {
                     path.split("|").map { File(it) }.filter { it.exists() }.forEach {
-                        it.smartDelete()
+                        if(!it.smartDelete()) allDelete = false
+                        MediaRepository.deleteThumbnail(it.path)
                     }
                 } else {
-                    file.smartDelete()
+                    if(!file.smartDelete()) allDelete = false
+                    MediaRepository.deleteThumbnail(file.path)
                 }
-                response.writeObject(BaseResponse(0, "").json())
+                if(allDelete)
+                    response.writeObject(BaseResponse(0, "").json())
+
                 return
             }
 
@@ -64,9 +71,11 @@ class FileHandler : BaseHandler() {
                 return
             }
             "move" -> {
-                File(path).moveTo(toPath!!)
-                response.writeObject(BaseResponse(0, "").json())
-                return
+                if(File(path).moveTo(toPath!!)){
+                    response.writeObject(BaseResponse(0, "").json())
+                    return
+                }
+
             }
         }
 

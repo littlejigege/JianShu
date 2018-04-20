@@ -20,6 +20,7 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
 
 import java.io.File
+import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Semaphore
@@ -41,11 +42,12 @@ object MediaRepository {
     private val thumbnailsDao = Room.databaseBuilder(App.ctx, ThumbnailDatabase::class.java, "thumbnails").build().thumbnailDao()
     private val formatter = SimpleDateFormat.getDateInstance()
 
-    var musics: List<MFile>? = null
-    var docs: List<MFile>? = null
-    var videos: List<MFile>? = null
-    var pictures: List<MFile>? = null
-    var apps: List<AppInfo>? = null
+    var musics: MutableList<MFile>? = null
+
+    var docs: MutableList<MFile>? = null
+    var videos: MutableList<MFile>? = null
+    var pictures: MutableList<MFile>? = null
+    var apps: MutableList<AppInfo>? = null
 
     init {
         thread {
@@ -59,7 +61,7 @@ object MediaRepository {
     @Synchronized
     fun getMusic(): List<MFile> {
 
-        if (musics != null) return musics!!
+        if (musics != null) return musics!!.filter { File(it.path).exists() }
 
         val projection = arrayOf(MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.SIZE)
         val cursor = mContentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -74,12 +76,12 @@ object MediaRepository {
                 val location = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
                 if (initSize == 0L) initSize = File(location).length()
                 val info = MFile(initSize, location, formatter.format(Date(File(location).lastModified())))
-                list.add(info)
+                if (File(location).exists()) {
+                    list.add(info)
+                }
             } while (cursor.moveToNext())
 
         cursor.close()
-
-
 
         this.musics = list
         return list
@@ -89,7 +91,7 @@ object MediaRepository {
     @Synchronized
     fun getDocument(): List<MFile> {
 
-        if (docs != null) return docs!!
+        if (docs != null) return docs!!.filter { File(it.path).exists() }
 
         val list = mutableListOf<MFile>()
         val projection = arrayOf(MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.MIME_TYPE, MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.TITLE)
@@ -110,7 +112,9 @@ object MediaRepository {
                 val location = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA))
                 val initSize = java.lang.Long.parseLong(cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.SIZE)))
                 val info = MFile(initSize, location, formatter.format(Date(File(location).lastModified())))
-                list.add(info)
+                if (File(location).exists()) {
+                    list.add(info)
+                }
             } while (cursor.moveToNext())
 
             cursor.close()
@@ -124,7 +128,7 @@ object MediaRepository {
     @Synchronized
     fun getVideo(): List<MFile> {
 
-        if (videos != null) return videos!!
+        if (videos != null) return videos!!.filter { File(it.path).exists() }
 
 
         val list = mutableListOf<MFile>()
@@ -141,7 +145,9 @@ object MediaRepository {
                 val location = cursor.getString(cursor.getColumnIndex(MediaStore.Video.VideoColumns.DATA))
                 val initSize = java.lang.Long.parseLong(cursor.getString(cursor.getColumnIndex(MediaStore.Video.VideoColumns.SIZE)))
                 val info = MFile(initSize, location, formatter.format(Date(File(location).lastModified())))
-                list.add(info)
+                if (File(location).exists()) {
+                    list.add(info)
+                }
             } while (cursor.moveToNext())
         }
         cursor?.close()
@@ -153,7 +159,7 @@ object MediaRepository {
     @Synchronized
     fun getPhotosDirectory(): List<MFile> {
 
-        if (pictures != null) return pictures!!
+        if (pictures != null) return pictures!!.filter { File(it.path).exists() }
 
         val list = mutableListOf<MFile>()
         val addPath = HashSet<String>()
@@ -187,34 +193,82 @@ object MediaRepository {
     fun getPhotos(path: String?): List<MFile>? {
         if (path == null) return null
         val list = mutableListOf<MFile>()
-        list.addAll(File(path).listFiles().filter { it.isFile }.map { MFile(it.length(), it.path, formatter.format(Date(it.lastModified()))) }.filter {
+        list.addAll(File(path).listFiles().filter { it.isFile && it.exists() }.map { MFile(it.length(), it.path, formatter.format(Date(it.lastModified()))) }.filter {
             it.path.endsWith(".jpg") ||
                     it.path.endsWith(".png") ||
                     it.path.endsWith(".jpeg") ||
                     it.path.endsWith(".gif") ||
                     it.path.endsWith(".bmp") ||
                     it.path.endsWith(".jpg") ||
-                    it.path.endsWith(".webp")||
-                    it.path.endsWith(".tif")||
+                    it.path.endsWith(".webp") ||
+                    it.path.endsWith(".tif") ||
                     it.path.endsWith(".tiff")
         })
         return list
     }
+//
+//    private fun cutBitmapToThumbnails(path: String, type: Int): Bitmap? {
+//
+//        val file = File(path)
+//        if (!file.exists()) return null;
+//
+//        if (type == 0) return ThumbnailUtils.createVideoThumbnail(path, MICRO_KIND)
+//
+//        if (type == 1) {
+//            val options = BitmapFactory.Options()
+//            options.apply {
+//                inSampleSize = 4
+//            }
+//
+//            val bitmap = BitmapFactory.decodeFile(path)
+//            return ThumbnailUtils.extractThumbnail(bitmap, 150, 100)
+//        }
+//
+//        return null
+//    }
 
-    private fun cutBitmapToThumbnails(path: String, type: Int): Bitmap? {
+    fun cutBitmapToThumbnails(url: String?, type: Int, width: Int = 150, height: Int = 100): Bitmap? {
+        var bitmap: Bitmap? = null
+        if (url == null || !File(url).exists()) return bitmap
 
-        val file = File(path)
+
+        val file = File(url)
         if (!file.exists()) return null;
+        if (type == 0) return ThumbnailUtils.createVideoThumbnail(url, MICRO_KIND)
 
-        if (type == 0) return ThumbnailUtils.createVideoThumbnail(path, MICRO_KIND)
-
-        if (type == 1) {
-            val bitmap = BitmapFactory.decodeFile(path)
-            return ThumbnailUtils.extractThumbnail(bitmap, 150, 100)
+        try {
+            val opts = BitmapFactory.Options()
+            opts.inJustDecodeBounds = true
+            BitmapFactory.decodeFile(url, opts)
+            opts.inSampleSize = calculateSampleSize(opts, width, height)
+            opts.inJustDecodeBounds = false
+            opts.inPreferredConfig = Bitmap.Config.RGB_565
+            opts.inPurgeable = true
+            opts.inInputShareable = true
+            bitmap = BitmapFactory.decodeStream(file.inputStream(), null, opts)
+            bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT)
+            return bitmap
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
-        return null
+        return bitmap
     }
+
+    private fun calculateSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        val height = options.outHeight
+        val width = options.outWidth
+        var inSampleSize = 1
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+            while (halfHeight / inSampleSize > reqHeight && halfWidth / inSampleSize > reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+        return inSampleSize
+    }
+
 
     @Synchronized
     fun getApplications(): List<AppInfo>? {
@@ -246,7 +300,14 @@ object MediaRepository {
         thumbnailsDao.insert(thumbnail)
     }
 
+    fun deleteThumbnail(path: String) {
+        thumbnailsDao.delteThumbnail(path);
+    }
 
+    @Synchronized
+    fun deleteFromMemory(path: String) {
+
+    }
 
     fun getThumbnail(path: String, type: Int): Thumbnail? {
 

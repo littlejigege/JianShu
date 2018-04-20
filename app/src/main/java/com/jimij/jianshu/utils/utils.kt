@@ -21,10 +21,10 @@ import com.weechan.httpserver.httpserver.HttpResponse
 import com.weechan.httpserver.httpserver.uitls.writeTo
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import java.io.*
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 import kotlin.concurrent.thread
 
@@ -168,44 +168,123 @@ fun zipFiles(srcfile: Array<File>, zipfile: HttpResponse) {
     }
 }
 
-private fun ZipOutputStream.zipFolderFrom(src: String) {
-    zip(File(src).listFiles(), File(src).name)
+fun File.zipInputStream() = ZipInputStream(this.inputStream())
+
+fun File.zipOutputStream() = ZipOutputStream(this.outputStream())
+
+fun InputStream.zipInputStream() = ZipInputStream(this)
+
+fun OutputStream.zipOutputStream() = ZipOutputStream(this)
+
+infix fun File.unZipTo(path: String) {
+    //使用GBK编码,避免压缩中文文件名乱码
+    checkUnzipFolder(path)
+    ZipFile(this) unZipTo path
 }
 
-fun ZipOutputStream.zipFrom(vararg srcs: String): ZipOutputStream {
+infix fun ZipFile.unZipTo(path: String) {
+    checkUnzipFolder(path)
+    for (entry in entries()) {
+        //判断是否为文件夹
+        if (entry.isDirectory) {
+            File("${path}/${entry.name}").mkdirs()
+        } else {
+            val input = getInputStream(entry)
+            val outputFile = File("${path}/${entry.name}")
+            if (!outputFile.exists()) outputFile.smartCreateNewFile()
+            val output = outputFile.outputStream()
+            input.writeTo(output, DEFAULT_BUFFER_SIZE)
+        }
+    }
+}
+
+/**
+ * 检查路径正确性
+ */
+private fun checkUnzipFolder(path: String) {
+    val file = File(path)
+    if (file.isFile) throw RuntimeException("路径不能是文件")
+    if (!file.exists()) {
+        if (!file.mkdirs()) throw RuntimeException("创建文件夹失败")
+    }
+}
+
+fun ZipOutputStream.zipFrom(vararg srcs: String) {
+
     val files = srcs.map { File(it) }
 
     files.forEach {
-
         if (it.isFile) {
-            zipFileFrom(it.path)
-        } else {
-            zipFolderFrom(it.path)
+            zip(arrayOf(it), null)
+        } else if (it.isDirectory) {
+            zip(it.listFiles(), it.name)
         }
     }
-
-    flush()
-
-    return this
-}
-
-private fun ZipOutputStream.zipFileFrom(src: String) {
-    val file = File(src)
-    this.zip(arrayOf(file), null)
+    this.close()
 }
 
 private fun ZipOutputStream.zip(files: Array<File>, path: String?) {
+    //前缀,用于构造路径
     val prefix = if (path == null) "" else "$path/"
+
+    if (files.isEmpty()) createEmptyFolder(prefix)
+
     files.forEach {
         if (it.isFile) {
-            Log.e("压缩中", "压缩 : ${it.path}")
             val entry = ZipEntry("$prefix${it.name}")
             val ins = it.inputStream().buffered()
-            this.putNextEntry(entry)
-            ins.writeTo(this, DEFAULT_BUFFER_SIZE)
-            this.closeEntry()
+            putNextEntry(entry)
+            ins.writeTo(this, DEFAULT_BUFFER_SIZE, closeOutput = false)
+            closeEntry()
         } else {
-            this.zip(it.listFiles(), "$prefix${it.name}")
+            zip(it.listFiles(), "$prefix${it.name}")
         }
     }
+}
+
+/**
+ * inputstream内容写入outputstream
+ */
+fun InputStream.writeTo(outputStream: OutputStream, bufferSize: Int = 1024 * 2,
+                        closeInput: Boolean = true, closeOutput: Boolean = true) {
+
+    val buffer = ByteArray(bufferSize)
+    val br = this.buffered()
+    val bw = outputStream.buffered()
+    var length = 0
+
+    while ({ length = br.read(buffer);length != -1 }()) {
+        bw.write(buffer, 0, length)
+    }
+
+    bw.flush()
+
+    if (closeInput) {
+        close()
+    }
+
+    if (closeOutput) {
+        outputStream.close()
+    }
+}
+
+/**
+ * 生成一个压缩文件的文件夹
+ */
+private fun ZipOutputStream.createEmptyFolder(location: String) {
+    putNextEntry(ZipEntry(location))
+    closeEntry()
+}
+
+fun File.smartCreateNewFile(): Boolean {
+
+    if (exists()) return true
+    if (parentFile.exists()) return createNewFile()
+
+    if (parentFile.mkdirs()) {
+        if (this.createNewFile()) {
+            return true
+        }
+    }
+    return false
 }

@@ -28,6 +28,5 @@ class BaseActivity : PermissionCompatActivity() {
         val enterTransition = Explode()
         enterTransition.duration = 500
         window.enterTransition = enterTransition
-
     }
 }
