@@ -22,8 +22,6 @@ class HttpMessageReslover {
 
             val firstLine = ins.readLine() ?: return null
 
-            Log.e("HttpMessageReslover", firstLine.toString())
-
             val headers = StringBuffer()
 
             var tempStr = ins.readLine()
@@ -38,6 +36,8 @@ class HttpMessageReslover {
             val requestLine = RequestLine(firstLine)
             val requestHeaders = RequestHeaders(headers.toString())
             val requestBody = RequestBody(ins, requestHeaders.get("content-type"), requestHeaders.get("content-length")?.toLongOrNull(),requestHeaders.get("boundary"))
+
+            Log.e("HttpMessageReslover", "path ${requestLine.path}")
 
             return RequestMessage(socket.inetAddress.hostAddress,requestLine, requestHeaders, requestBody)
 

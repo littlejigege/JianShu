@@ -1,5 +1,6 @@
 package com.weechan.httpserver.httpserver
 
+import android.os.Environment
 import android.util.Log
 import com.example.androidservice.httpserver.reslover.reslovebean.RequestMessage
 import com.weechan.httpserver.httpserver.uitls.writeTo
@@ -41,7 +42,7 @@ class ResponseBuilder() {
     fun build(): HttpResponse = response
 
     private fun setUp(){
-        file = File(requestPath)
+        file = File(Environment.getExternalStorageDirectory().path+"/Jianshu/web/"+requestPath)
         if (file.exists() && file.isFile) fileSize = file.length()
         range = resloveRange(mRequestMessage.getHead("range"), fileSize)
     }
@@ -54,7 +55,6 @@ class ResponseBuilder() {
 
     private fun setHttpState() {
 
-//        Log.e("ResponseBuilder", file.exists().toString())
 
         if ((!file.exists() || !file.isFile) && !handlerExist) {
             response.httpState = HttpState.Not_Found_404
@@ -113,7 +113,6 @@ class ResponseBuilder() {
 
             output.write(buf, 0, readBytes)
             length -= readBytes
-            Log.e("ResponseBuilder",length.toString())
         }
 
     }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
+import android.transition.Explode
 import com.jimij.jianshu.ui.mainpage.MainActivity
 import com.jimij.jianshu.R
 
@@ -32,12 +33,16 @@ class StartActivity : BaseActivity() {
             }
         }
 
+
+
     }
 
     fun transitionTo(ctx: Activity) {
-        val pairs = createSafeTransitionParticipants(ctx, true)
-        val transitionActivityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(ctx, *pairs)
-        ctx.startActivity(Intent(ctx, MainActivity::class.java), transitionActivityOptions.toBundle())
+//        val pairs = createSafeTransitionParticipants(ctx, true)
+//        val transitionActivityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(ctx, *pairs)
+        val bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle()
+
+        ctx.startActivity(Intent(ctx, MainActivity::class.java),bundle)
     }
 
 }

@@ -3,6 +3,7 @@ package com.jimij.jianshu.server.handler
 import com.jimij.jianshu.data.BaseResponse
 import com.jimij.jianshu.data.MediaRepository
 import com.jimij.jianshu.data.json
+import com.jimij.jianshu.utils.getDefaultSavePath
 import com.jimij.jianshu.utils.writeObject
 import com.mobile.utils.JsonMaker
 import com.mobile.utils.moveTo
@@ -27,13 +28,12 @@ class FileHandler : BaseHandler() {
         }
 
         val operation = request.getRequestArgument("operation")
-        val path = request.getRequestArgument("path")
+        var path = request.getRequestArgument("path")
 
         if (path == null) {
-            response.writeObject(BaseResponse(-2, "缺少path参数"))
+            response.writeObject(BaseResponse(-2, "缺少参数 path").json())
             return
         }
-
         val file = File(path)
 
         if (!file.exists() && operation == "delete" && !path.contains("|")) {
@@ -53,14 +53,14 @@ class FileHandler : BaseHandler() {
             "delete" -> kotlin.run {
                 if (path.contains("|")) {
                     path.split("|").map { File(it) }.filter { it.exists() }.forEach {
-                        if(!it.smartDelete()) allDelete = false
+                        if (!it.smartDelete()) allDelete = false
                         MediaRepository.deleteThumbnail(it.path)
                     }
                 } else {
-                    if(!file.smartDelete()) allDelete = false
+                    if (!file.smartDelete()) allDelete = false
                     MediaRepository.deleteThumbnail(file.path)
                 }
-                if(allDelete)
+                if (allDelete)
                     response.writeObject(BaseResponse(0, "").json())
 
                 return
@@ -71,7 +71,7 @@ class FileHandler : BaseHandler() {
                 return
             }
             "move" -> {
-                if(File(path).moveTo(toPath!!)){
+                if (File(path).moveTo(toPath!!)) {
                     response.writeObject(BaseResponse(0, "").json())
                     return
                 }

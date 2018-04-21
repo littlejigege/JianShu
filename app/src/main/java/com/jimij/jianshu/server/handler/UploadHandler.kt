@@ -3,6 +3,7 @@ package com.jimij.jianshu.server.handler
 import android.util.Log
 import com.jimij.jianshu.data.BaseResponse
 import com.jimij.jianshu.data.json
+import com.jimij.jianshu.utils.getDefaultSavePath
 import com.jimij.jianshu.utils.writeObject
 import com.mobile.utils.JsonMaker
 import com.weechan.httpserver.httpserver.HttpRequest
@@ -37,7 +38,11 @@ class UploadHandler : BaseHandler() {
                 }
             }.byteInputStream().writeTo(this)
         }
-        if (savePath == null || fileName == null) return
+        if (fileName == null) return
+
+        if(savePath == null){
+            savePath = getDefaultSavePath()
+        }
 
         savePath = if (savePath.endsWith("/")) {
             savePath.substring(0, savePath.length - 1)

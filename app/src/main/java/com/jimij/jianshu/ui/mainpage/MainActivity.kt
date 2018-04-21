@@ -57,23 +57,25 @@ class MainActivity : BaseActivity(), MainContract.View {
     override fun onResume() {
         super.onResume()
         presenter.view = this
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)//保持屏幕常亮
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        buildEnterTransition()
         presenter = MainPresenter(this)
         EventBus.getDefault().register(this)
         setContentView(R.layout.activity_main)
         initUI()
         setUpListener()
         Permission.STORAGE.doAfterGet(this) {
-            MediaRepository
+            unZipWebFiles()
             inUiThread { presenter.startServer() }
         }
-
-        val point = getScreenSize()
-        startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), 199)
-        screenCapture = ScreenCapture(point.x, point.y)
+//
+//        val point = getScreenSize()
+//        startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), 199)
+//        screenCapture = ScreenCapture(point.x, point.y)
 
     }
 
@@ -121,7 +123,7 @@ class MainActivity : BaseActivity(), MainContract.View {
 
         if (result != null) {
             if (result.contents == null) {
-                showToast("扫描异常")
+
             } else {
                 val url = "http://120.77.38.183/qr/send?sign=${result.contents}&ip=${Base64.encodeToString("${getHostIp()}:8080".toByteArray(), 0)}"
                 launch {
@@ -133,20 +135,20 @@ class MainActivity : BaseActivity(), MainContract.View {
             }
         }
 
-        if (requestCode == 199) {
-            if (screenCapture == null) return
-
-            val mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data)
-            if (mediaProjection == null) {
-                Log.e("@@", "media projection is null")
-                return
-            }
-            with(screenCapture!!) {
-                mediaProjection.createVirtualDisplay("test", width, height, 1,
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                        mImageReader.surface, null, null)
-            }
-        }
+//        if (requestCode == 199) {
+//            if (screenCapture == null) return
+//
+//            val mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data)
+//            if (mediaProjection == null) {
+//                Log.e("@@", "media projection is null")
+//                return
+//            }
+//            with(screenCapture!!) {
+//                mediaProjection.createVirtualDisplay("test", width, height, 1,
+//                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+//                        mImageReader.surface, null, null)
+//            }
+//        }
     }
 
     override fun onBackPressed() {
@@ -183,8 +185,8 @@ class MainActivity : BaseActivity(), MainContract.View {
 
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onCaptureScreen(screenCaptureResult: ScreenCaptureResult){
-        if(screenCaptureResult.code == ScreenCaptureResult.REQUEST){
+    fun onCaptureScreen(screenCaptureResult: ScreenCaptureResult) {
+        if (screenCaptureResult.code == ScreenCaptureResult.REQUEST) {
             val bitmap = screenCapture?.startCapture()
             screenCaptureResult.bitmap = bitmap
             screenCaptureResult.code = ScreenCaptureResult.RESPONSE
@@ -196,5 +198,6 @@ class MainActivity : BaseActivity(), MainContract.View {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
     }
+
 }
 

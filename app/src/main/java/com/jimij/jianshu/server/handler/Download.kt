@@ -33,7 +33,9 @@ class Download : BaseHandler() {
         var fileName = ""
         this.file = File(path)
 
-        if (!path.contains("|") && file.exists() && File(path).isFile) {
+
+
+        if (!path.contains("|") && file.exists() && file.isFile) {
 
             fileSize = file.length()
             range = resloveRange(request.getRequestHead("range"), fileSize)
@@ -47,16 +49,18 @@ class Download : BaseHandler() {
             setBody()
         } else {
 
-            fileName = "download.zip"
+
 
             if(file.exists() && file.isDirectory){
-                response.write { ZipOutputStream(this).zipFrom(file.path).close()}
+                response.write { ZipOutputStream(this).zipFrom(file.path)}
             }else{
                 val files: Array<File> = path.split("|").map { File(it) }.filter { it.exists() }.toTypedArray()
 
+                fileName = files[0].name
+                fileName += "等${files.size}个文件.zip"
 
                 response.write {
-                    ZipOutputStream(this).zipFrom(*files.map { it.path }.toTypedArray()).close()
+                    ZipOutputStream(this).zipFrom(*files.map { it.path }.toTypedArray())
                 }
             }
 
@@ -65,7 +69,7 @@ class Download : BaseHandler() {
         }
 
         response.addHeaders {
-            "Content-Disposition" - "$type; filename=$fileName"
+            "Content-Disposition" - "$type; filename=\"$fileName\""
         }
 
 

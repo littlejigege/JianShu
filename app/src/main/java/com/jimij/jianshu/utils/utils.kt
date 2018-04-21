@@ -8,11 +8,13 @@ import android.graphics.Point
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.wifi.WifiManager
+import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import com.google.gson.Gson
 import com.jimij.jianshu.App
+import com.jimij.jianshu.R
 import com.mobile.utils.dp2px
 import com.mobile.utils.gaussBlud
 import com.mobile.utils.windowManager
@@ -176,6 +178,7 @@ fun InputStream.zipInputStream() = ZipInputStream(this)
 
 fun OutputStream.zipOutputStream() = ZipOutputStream(this)
 
+
 infix fun File.unZipTo(path: String) {
     //使用GBK编码,避免压缩中文文件名乱码
     checkUnzipFolder(path)
@@ -287,4 +290,16 @@ fun File.smartCreateNewFile(): Boolean {
         }
     }
     return false
+}
+
+fun getDefaultSavePath(): String {
+    val root = Environment.getExternalStorageDirectory()
+    val file = File(root.path, "Jianshu")
+    file.toggleDir()
+    return file.path
+}
+
+fun unZipWebFiles() {
+    writeFileFromIS(File(getDefaultSavePath(), "web.zip"), App.ctx.resources.openRawResource(R.raw.web), false)
+    File(getDefaultSavePath(), "web.zip").unZipTo(getDefaultSavePath())
 }
