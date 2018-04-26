@@ -1,16 +1,19 @@
-package com.example.androidservice.httpserver.reslover.reslovebean
+package com.weechan.httpserver.httpserver.reslover.reslovebean
 
+import android.os.Parcel
+import android.os.Parcelable
 import com.example.androidservice.httpserver.reslover.URLResolver
 
 /**
  * Created by 铖哥 on 2018/3/22.
  */
-data class RequestLine(val requestLine: String){
+data class RequestLine(val requestLine: String) {
 
     val method: String
     val path: String
     val protocol: String
     val arguments: HashMap<String, String>
+
 
     init {
 
@@ -24,4 +27,6 @@ data class RequestLine(val requestLine: String){
         protocol = requestLine.substring(lastIndex + 1, requestLine.length)
 
     }
+
+
 }

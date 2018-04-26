@@ -1,8 +1,7 @@
 package com.weechan.httpserver.httpserver
 
 import android.os.Environment
-import android.util.Log
-import com.example.androidservice.httpserver.reslover.reslovebean.RequestMessage
+import com.weechan.httpserver.httpserver.reslover.reslovebean.RequestMessage
 import com.weechan.httpserver.httpserver.uitls.writeTo
 import java.io.File
 import java.io.OutputStream

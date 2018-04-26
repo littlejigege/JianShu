@@ -4,14 +4,12 @@ import android.util.Log
 import com.weechan.httpserver.httpserver.annotaions.Http
 import com.weechan.httpserver.httpserver.interfaces.HttpHandler
 import com.example.androidservice.httpserver.reslover.HttpMessageReslover
-import com.example.androidservice.httpserver.reslover.reslovebean.RequestMessage
-import com.weechan.httpserver.httpserver.interfaces.Response
+import com.weechan.httpserver.httpserver.reslover.reslovebean.RequestMessage
 import com.weechan.httpserver.httpserver.uitls.writeTo
 import java.io.*
 import java.net.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import kotlin.concurrent.thread
 
 
 /**

@@ -5,10 +5,10 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
-import com.example.androidservice.httpserver.reslover.reslovebean.RequestMessage
+import com.weechan.httpserver.httpserver.reslover.reslovebean.RequestMessage
+//import com.jimij.jianshu.IHttpServerController
 import com.jimij.jianshu.server.handler.*
 import com.weechan.httpserver.httpserver.HttpServerBuilder
-import java.net.Socket
 
 
 /**
@@ -49,6 +49,7 @@ class HttpServerService : Service() {
     }
 
     private val mController = object : ServiceController() {
+
         override fun clearWhiter() {
             whiteList.clear()
         }
@@ -84,4 +85,6 @@ class HttpServerService : Service() {
         abstract fun clearWhiter()
         abstract fun onIntercept(listener: (RequestMessage) -> Boolean)
     }
+
 }
+

@@ -1,12 +1,16 @@
-package com.example.androidservice.httpserver.reslover.reslovebean
+package com.weechan.httpserver.httpserver.reslover.reslovebean
+
+import android.os.Parcel
+import android.os.Parcelable
 
 /**
  * Created by 铖哥 on 2018/3/22.
  */
 
-data class RequestHeaders(val headers: String) {
+data class RequestHeaders(val headers: String)  {
 
     private val headersMapper = hashMapOf<String, String>()
+
 
     init {
 
@@ -35,4 +39,5 @@ data class RequestHeaders(val headers: String) {
     fun get(key: String): String? {
         return headersMapper.get(key)
     }
+
 }

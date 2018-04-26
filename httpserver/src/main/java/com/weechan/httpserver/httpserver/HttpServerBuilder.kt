@@ -2,11 +2,9 @@ package com.weechan.httpserver.httpserver
 
 import android.content.Context
 import android.util.Log
-import com.example.androidservice.httpserver.reslover.reslovebean.RequestMessage
+import com.weechan.httpserver.httpserver.reslover.reslovebean.RequestMessage
 import com.weechan.httpserver.httpserver.interfaces.HttpHandler
 import com.weechan.httpserver.httpserver.uitls.getClassesInPackage
-import java.net.Socket
-import java.nio.charset.Charset
 
 /**
  * Created by 铖哥 on 2018/3/19.

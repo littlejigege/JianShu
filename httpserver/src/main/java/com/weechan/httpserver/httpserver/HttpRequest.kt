@@ -1,10 +1,9 @@
 package com.weechan.httpserver.httpserver
 
-import com.example.androidservice.httpserver.reslover.reslovebean.RequestMessage
+import com.weechan.httpserver.httpserver.reslover.reslovebean.RequestMessage
 import com.weechan.httpserver.httpserver.reslover.body.BinaryInputStream
 import com.weechan.httpserver.httpserver.reslover.body.FormDataPart
 import com.weechan.httpserver.httpserver.reslover.reslovebean.RequestBody
-import java.io.InputStream
 
 /**
  * Created by 铖哥 on 2018/3/18.

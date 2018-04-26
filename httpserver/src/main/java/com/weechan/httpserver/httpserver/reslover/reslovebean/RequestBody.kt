@@ -1,5 +1,6 @@
 package com.weechan.httpserver.httpserver.reslover.reslovebean
 
+import android.os.Parcelable
 import com.weechan.httpserver.httpserver.reslover.body.FormDataPart
 import com.weechan.httpserver.httpserver.reslover.body.ResponseBodyStreams
 import java.io.DataInputStream
@@ -8,7 +9,7 @@ import java.io.InputStream
 /**
  * Created by 铖哥 on 2018/3/22.
  */
-data class RequestBody( val ins: DataInputStream, private val contentType: String?, val contentLength: Long?, private val boundary: String?) {
+data class RequestBody( val ins: DataInputStream, private val contentType: String?, val contentLength: Long?, private val boundary: String?)  {
 
 
     var responseBodyStreams: ResponseBodyStreams? = null

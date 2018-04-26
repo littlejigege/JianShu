@@ -9,17 +9,17 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <uses-feature android:name="android.hardware.usb.accessory" />
 
     <application
-
         android:name=".App"
         android:allowBackup="true"
-
         android:icon="@drawable/mipmap"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <!--hotfix相关-->
+
+        <!-- hotfix相关 -->
         <meta-data
             android:name="com.taobao.android.hotfix.IDSECRET"
             android:value="24840442" />
@@ -29,7 +29,7 @@
         <meta-data
             android:name="com.taobao.android.hotfix.RSASECRET"
             android:value="MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCJYkENG4aingFZGX2LAcE0Gba3xBEz/zhaow7bhSvKCx5Cs/1xy78BDRbBX/kwIvNOONsb8uTcdNPLz+7p2fT1I3DcWg0QnSfZ56ohFp5B6fTK/35f5ZEbJ3ob/s2HrgVm7lv/mXcpjW38rm3+SBTAJltAMmMaJkgkTtcDcObV00dbRPUwEOVhSARWE2yhH0qzVIhtbNKRwOtFwyuYK4UYmWymJRecnqzwbrfrkr2cPHWdjAs/CCxDXGwVg8X77ySixBiycPZXJSMw1br20w3NAMKmcjj3siZl2CiBV4CXIvlXSLefyehRC2jtrndhqnPSDRn0GtMesOZhuJ1H4hw3AgMBAAECggEAFJ1juX3J5BjlhuMmTXeD8DdzjXukQTMo16DkF9iRy42DiurLOwohrRyzr2yhTbHQ5InvhvAZm2MEbO7UoM6NzUL2Knpwv291jWMPyktEkAt1KgjQg79E2NhBoHXJjXR1Zw6ZS29RzDBmsqXR53gVdQfMZYOqD0BzTs9twBxu5uLGb1t+Z6NL6uzMLxfRDr9K07Ac4UDWzNlyEVq9BdmtuIEm4dVTxnCWEDR21S7ArGHCDc5F6l4OQnqy5ulmFszed9ASR46Td5U95q0cWZo+xPOnOdfMEcStG8rw855AauT5u4lLUTI59G1WYNYh5xuamuLI/S3wbc8K6FrsdN5OoQKBgQDVcodqWTpwgE4inNKHwpMXi5KinSFA4kn0dACQ60mJqYG6CK99VmS/yjNqhZ9RRjzwF+cT5d2GlqyXYZ93+q4gSXxJOFYIyiEff68mNumD7sw1xQN7n1L6k+y9z98TMjnExa1r56uWhZLF6o9DIj/BglMMKUcyjBx0zBif0aFb7wKBgQCkxcFMEoLaWKc6FF2uf+K94Yzhqj5X5vV02JyWZAbNgi1sqshKd0Lrnm8u8yjy8dC0VtSCFTk1dk6J8tRmKFRMwJ0xhg7FMmfIcesY0XFCqjvwViJPwuA3Nbm6Y5pfTpdYEDM/yKJ7EJQ1uYqyk04e5502qeXcJAJVLE2nxQGcOQKBgAgUkt3KzPSPVuXmi+3JxunARefUDPs41dXkQlU6IwmMGjYhuAsFp0C/ddzVfCeGgi4QqZXOQOmkcJo2fuP64HamcYcQE+m3RTO9ELNgpsxw0NhEQhJ/AJQt32t8IBTI9PjnBt6r4YoMOnc1nwDKniFEPsKaGXDnbvhY9aGvPO2PAoGAXAoa72NntI/Q2aCGs/K7tVVIXMW8DV31vk9BKMC3DBSrSwga2X3E49icQp2RQiPRcOsPyZoRWsu7E1ORUX81l6oAJKm9lmmRj2YS7MoReiudT6LNh8BTfoOEO5lnodVEtOxXtEleeV/Jajk6QIYIHTtDlkVRIKb8ppcYyZ5CSAECgYEAlvlXMxOdHJTYm1fco+DTD3//iHGCzc1/r6VR8gfaikFfmBKvV6LW6Ha+pAtz+xuEeZdqW/35anKi+KR9Ct/Jv9rlJDNZKSWv0R3fGm35hrJeuSJLrm3pvLLQ2zwgre/rP6TiulBZpzFTFYQpkMUIBMUZpbvBy7ANO8E4jshm9cg=" />
-        <!--hotfix相关-->
+        <!-- hotfix相关 -->
         <activity
             android:name=".ui.mainpage.MainActivity"
             android:label=""
@@ -38,26 +38,46 @@
         </activity>
 
         <activity
-            android:hardwareAccelerated="true"
             android:name=".ui.scan.CaptureActivity"
+            android:hardwareAccelerated="true"
+            android:noHistory="true"
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"
             android:theme="@style/zxing_CaptureTheme"
-            android:noHistory="true"
-            android:windowSoftInputMode="stateAlwaysHidden">
-        </activity>
+            android:windowSoftInputMode="stateAlwaysHidden" />
 
         <service android:name=".server.HttpServerService" />
 
         <activity
-            android:name="com.jimij.jianshu.ui.startpage.StartActivity"
+            android:name=".ui.startpage.StartActivity"
             android:screenOrientation="portrait">
+        </activity>
+
+        <activity android:name=".ui.usb.UsbActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
+
+            <meta-data
+                android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+                android:resource="@xml/accessory_filter" />
+
         </activity>
+
+        <receiver android:name=".ui.usb.UsbActivity$UsbReceiver"
+            android:enabled="true"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="com.android.example.USB_PERMISSION"/>
+                <action android:name="TTT"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

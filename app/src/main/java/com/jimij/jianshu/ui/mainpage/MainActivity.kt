@@ -2,10 +2,13 @@ package com.jimij.jianshu.ui.mainpage
 
 
 import android.app.Activity
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Point
 import android.hardware.display.DisplayManager
+import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
 import android.util.Base64
@@ -30,6 +33,12 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import com.jimij.jianshu.data.ScreenCaptureResult
+import android.widget.Toast
+import android.hardware.usb.UsbAccessory
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
+import android.os.Parcelable
+import com.jimij.jianshu.App
 
 
 class MainActivity : BaseActivity(), MainContract.View {
@@ -38,6 +47,7 @@ class MainActivity : BaseActivity(), MainContract.View {
     private var dialog: MaterialDialog? = null
     //与活动生命周期关联
     private lateinit var presenter: MainPresenter
+
 
     override fun requestPermission(ip: String) {
         if (dialog == null) {
@@ -72,11 +82,6 @@ class MainActivity : BaseActivity(), MainContract.View {
             unZipWebFiles()
             inUiThread { presenter.startServer() }
         }
-//
-//        val point = getScreenSize()
-//        startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), 199)
-//        screenCapture = ScreenCapture(point.x, point.y)
-
     }
 
     override fun onStop() {
@@ -198,6 +203,9 @@ class MainActivity : BaseActivity(), MainContract.View {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
     }
+
+
+
 
 }
 

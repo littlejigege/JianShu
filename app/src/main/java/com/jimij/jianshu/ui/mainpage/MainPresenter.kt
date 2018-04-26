@@ -1,12 +1,8 @@
 package com.jimij.jianshu.ui.mainpage
 
 import android.app.Service
-import android.arch.lifecycle.GenericLifecycleObserver
-import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.LifecycleOwner
 import android.content.*
 import android.os.IBinder
-import android.util.Log
 import com.jimij.jianshu.App
 import com.jimij.jianshu.server.HttpServerService
 import com.jimij.jianshu.utils.NetCallback
@@ -69,6 +65,7 @@ class MainPresenter(var view : MainActivity?) : MainContract.Presenter<MainActiv
 
     override fun addWhiter(ip: String) {
         mServerController?.addWhiter(ip)
+
     }
 
 
