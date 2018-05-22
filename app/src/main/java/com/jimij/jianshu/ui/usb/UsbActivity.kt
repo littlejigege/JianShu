@@ -9,14 +9,24 @@ import android.hardware.usb.UsbAccessory
 import android.hardware.usb.UsbManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
 import com.jimij.jianshu.App
 import com.jimij.jianshu.R
+import com.jimij.jianshu.utils.getDefaultSavePath
+import com.jimij.jianshu.utils.writeTo
+import com.mobile.utils.smartDelete
 import com.mobile.utils.usbManager
+import com.weechan.httpserver.httpserver.reslover.body.BinaryInputStream
+import com.weechan.httpserver.httpserver.uitls.writeTo
 import kotlinx.android.synthetic.main.activity_usb.*
+import java.io.*
 import java.net.ServerSocket
+import java.util.TreeSet
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Semaphore
 import kotlin.concurrent.thread
 
 
@@ -26,66 +36,101 @@ class UsbActivity : AppCompatActivity() {
 
 //    private val usbReceiver: BroadcastReceiver = UsbReceiver()
 
+    var time : Long = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_usb)
 
-        button.setOnClickListener { 
-            sendBroadcast(Intent("TTT"))
-        }
-
-//        val mPermissionIntent = PendingIntent.getBroadcast(this, 0, Intent(ACTION_USB_PERMISSION), 0)
-//        val filter = IntentFilter(ACTION_USB_PERMISSION)
-//        filter.addAction("ACTION_USB_ACCESSORY_DETACHED")
-//        registerReceiver(usbReceiver, filter)
-
-        println(usbManager.accessoryList == null)
-
-        thread{
+        thread {
             val socket = ServerSocket(10086)
-            while(true){
+            while (true) {
                 val ss = socket.accept();
-                Log.e("UsbActivity", "ACCEPT")
-                ss.getOutputStream().write("DFSADASDASDASDASDASDASD".toByteArray())
-                ss.close()
-            }
-        }
+                thread {
+                    if(time ==0L) time =  System.currentTimeMillis()
+                    Log.e("UsbActivity", "ACCEPT")
+                    val ins = DataInputStream(ss.getInputStream())
+                    val fileName = ins.readLine()
+                    val length = ins.readLine()
+                    val fromTo = ins.readLine()
 
-    }
+                    Log.e("UsbActivity", fromTo)
 
+                    val (from, to) = fromTo.split(' ').map { it.toLong() }
 
-    class UsbReceiver : BroadcastReceiver() {
+//                    val output = File(getDefaultSavePath() + "/${fileName}.A").outputStream().buffered()
+//
+//                    Log.e("UsbActivity", "USB DONE")
+//                    addAndcombine(fileName)
+                    with(File(getDefaultSavePath() + "/${fileName}")) {
+                        if (!exists()) createNewFile()
+                        val output = RandomAccessFile(this,"rw")
+                        output.seek(from)
 
-        override fun onReceive(context: Context, intent: Intent) {
-            val action = intent.action
-            
-            if(action == "TTT") {
-                Log.e("UsbReceiver", "TTTTT")
-            }
-            
-            if (ACTION_USB_PERMISSION == action) {
+                        val bi = BinaryInputStream(ins, (to - from + 1).toLong())
+                        val BUF_SIZE = 1024 * 1024 * 4
+                        val buf = ByteArray(BUF_SIZE)
 
-                Log.e("UsbReceiver", "ACTION_USB_PERMISSION")
-                synchronized(this) {
-                    val accessory = intent.getParcelableExtra<Parcelable>(UsbManager.EXTRA_ACCESSORY) as UsbAccessory
-//                usbManager.requestPermission(accessory, mPermissionIntent);
-                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        Toast.makeText(App.ctx, "Allow USB Permission", Toast.LENGTH_SHORT).show()
-                        openAccessory(accessory)
+                        var readLength = bi.read(buf)
+                        while (readLength != -1) {
+                            output.write(buf, 0, readLength)
+                            readLength = bi.read(buf)
+                        }
+                        output.close()
 
-                    } else {
-                        Toast.makeText(App.ctx, "Deny USB Permission", Toast.LENGTH_SHORT).show()
                     }
+
+                    Log.e("UsbActivity", "usb ${System.currentTimeMillis() - time}")
+                    ss.getOutputStream().write("SUCCESS@!!!".toByteArray())
+                    ss.close()
                 }
-            } else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED == action) {
-                Log.e("UsbReceiver", "ACTION_USB_ACCESSORY_DETACHED")
+
             }
         }
 
-        private fun openAccessory(accessory: UsbAccessory){
-            Log.e("UsbReceiver", accessory.description)
-        }
-    }
+        thread {
+            val socket = ServerSocket(10087)
+            while (true) {
 
+                val ss = socket.accept();
+                thread {
+                    if(time ==0L) time =  System.currentTimeMillis()
+                    Log.e("UsbActivity", "ACCEPT")
+                    val ins = DataInputStream(ss.getInputStream())
+                    val fileName = ins.readLine()
+                    val length = ins.readLine()
+                    val fromTo = ins.readLine()
+
+                    Log.e("UsbActivity", fromTo)
+
+                    val (from, to) = fromTo.split(' ').map { it.toLong() }
+
+                    with(File(getDefaultSavePath() + "/${fileName}")) {
+                        if (!exists()) createNewFile()
+                        val output = RandomAccessFile(this,"rw")
+                        output.seek(from)
+
+                        val bi = BinaryInputStream(ins, (to - from + 1).toLong())
+                        val BUF_SIZE = 1024 * 1024 * 4
+                        val buf = ByteArray(BUF_SIZE)
+
+                        var readLength = bi.read(buf)
+                        while (readLength != -1) {
+                            output.write(buf, 0, readLength)
+                            readLength = bi.read(buf)
+                        }
+                        output.close()
+
+                    }
+                    Log.e("UsbActivity", "total ${System.currentTimeMillis() - time}")
+                    ss.getOutputStream().write("SUCCESS@!!!".toByteArray())
+                    ss.close()
+                }
+
+            }
+        }
+
+
+    }
 
 }

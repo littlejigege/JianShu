@@ -34,13 +34,7 @@ class MainPresenter(var view : MainActivity?) : MainContract.Presenter<MainActiv
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             mServerController = service as HttpServerService.ServiceController
             mServerController?.start()
-            mServerController?.onIntercept { message ->
-                inUiThread { getView()?.requestPermission(message.ip) }
-                while (!isInterceptPass) {
-                }
-                isInterceptPass = false
-                !isPass
-            }
+            mServerController?.onIntercept { false}
         }
 
     }
@@ -91,8 +85,6 @@ class MainPresenter(var view : MainActivity?) : MainContract.Presenter<MainActiv
         mServerController?.stop()
         getView()?.onServerStopped()
     }
-
-
 
 
 

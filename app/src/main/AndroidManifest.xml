@@ -37,21 +37,6 @@
 
         </activity>
 
-        <activity
-            android:name=".ui.scan.CaptureActivity"
-            android:hardwareAccelerated="true"
-            android:noHistory="true"
-            android:screenOrientation="portrait"
-            android:stateNotNeeded="true"
-            android:theme="@style/zxing_CaptureTheme"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-
-        <service android:name=".server.HttpServerService" />
-
-        <activity
-            android:name=".ui.startpage.StartActivity"
-            android:screenOrientation="portrait">
-        </activity>
 
         <activity android:name=".ui.usb.UsbActivity">
 
@@ -67,16 +52,6 @@
                 android:resource="@xml/accessory_filter" />
 
         </activity>
-
-        <receiver android:name=".ui.usb.UsbActivity$UsbReceiver"
-            android:enabled="true"
-            android:exported="true"
-            >
-            <intent-filter>
-                <action android:name="com.android.example.USB_PERMISSION"/>
-                <action android:name="TTT"/>
-            </intent-filter>
-        </receiver>
 
     </application>
 

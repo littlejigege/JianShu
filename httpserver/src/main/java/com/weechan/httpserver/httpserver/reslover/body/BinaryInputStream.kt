@@ -6,7 +6,9 @@ import java.io.InputStream
 /**
  * Created by 铖哥 on 2018/4/4.
  */
-class BinaryInputStream(val ins :InputStream, val length : Long) {
+
+
+class BinaryInputStream(val ins :InputStream, val length : Long){
 
     private var readBytes = 0L
 

@@ -29,15 +29,7 @@ class HttpServerService : Service() {
                 }
                 .getHttpServer()
 
-        server.addHandler(ApplicationHandler::class.java)
-        server.addHandler(CaptureHandler::class.java)
-        server.addHandler(DeviceInfoHandler::class.java)
         server.addHandler(Download::class.java)
-        server.addHandler(FileHandler::class.java)
-        server.addHandler(MainHandler::class.java)
-        server.addHandler(MediaHandler::class.java)
-        server.addHandler(MyHttpHandler::class.java)
-        server.addHandler(ThumbnailHandler::class.java)
         server.addHandler(UploadHandler::class.java)
 
         server

@@ -1,8 +1,6 @@
 package com.jimij.jianshu.server.handler
 
 import android.util.Log
-import com.jimij.jianshu.data.BaseResponse
-import com.jimij.jianshu.data.json
 import com.jimij.jianshu.utils.getDefaultSavePath
 import com.jimij.jianshu.utils.writeObject
 import com.mobile.utils.JsonMaker
@@ -49,7 +47,7 @@ class UploadHandler : BaseHandler() {
         } else savePath
 
         if ( input == null){
-            response.writeObject(BaseResponse(-3,"没有要上传的文件").json())
+//            response.writeObject(BaseResponse(-3,"没有要上传的文件").json())
             return
         }
 
